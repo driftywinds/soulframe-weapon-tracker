@@ -397,7 +397,7 @@
         if (window.google && !googleTokenClient) {
           const client = window.google.accounts.oauth2.initTokenClient({
             client_id: '1073437837956-281q7jfqo1b8sv8au24jq7o2ftktc7o7.apps.googleusercontent.com', // REPLACE THIS
-            scope: 'https://www.googleapis.com/auth/drive.file',
+            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata',
             callback: (tokenResponse) => {
               if (tokenResponse.access_token) {
                 setAccessToken(tokenResponse.access_token);

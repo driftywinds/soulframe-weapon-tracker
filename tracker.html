@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soulframe Weapon Tracker</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Lucide React Check icon component
+    const Check = ({ size = 24, className = "" }) => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    );
+
+    const WeaponTracker = () => {
+      // Attunement icon mapping
+      const attunementIcons = {
+        'Courage': 'https://static.wikitide.net/soulframewiki/thumb/c/ca/CouragePip.png/100px-CouragePip.png',
+        'Spirit': 'https://static.wikitide.net/soulframewiki/thumb/3/38/SpiritPip.png/100px-SpiritPip.png',
+        'Grace': 'https://static.wikitide.net/soulframewiki/thumb/f/ff/GracePip.png/100px-GracePip.png'
+      };
+
+      // Function to render attunement with icons
+      const renderAttunement = (attunementString) => {
+        if (!attunementString) return '-';
+        
+        // Split by comma to handle multiple attunements
+        const attunements = attunementString.split(',').map(a => a.trim());
+        
+        return (
+          <div className="flex items-center gap-1 flex-wrap">
+            {attunements.map((attunement, index) => (
+              <div key={index} className="flex items-center gap-1">
+                {attunementIcons[attunement] && (
+                  <img 
+                    src={attunementIcons[attunement]} 
+                    alt={attunement}
+                    className="w-6 h-6 inline-block"
+                    title={attunement}
+                  />
+                )}
+                <span className="text-sm text-gray-300">{attunement}</span>
+              </div>
+            ))}
+          </div>
+        );
+      };
+
+      // WEBSITE OWNER: Edit attunement and virtueCap values here
+      const weapons = [
+        // BOW
+        { category: 'BOW', name: 'Blitzel', attunement: 'Courage', virtueCap: '28', image: 'https://static.wikitide.net/soulframewiki/6/63/Blitzel.png' },
+        { category: 'BOW', name: 'Juniper', attunement: 'Grace', virtueCap: '29', image: 'https://static.wikitide.net/soulframewiki/9/9a/Juniper.png' },
+        { category: 'BOW', name: 'The Starling', attunement: 'Grace', virtueCap: '30', image: 'https://static.wikitide.net/soulframewiki/5/55/StarlingBow.png' },
+        { category: 'BOW', name: 'Thistle', attunement: 'Grace', virtueCap: '36', image: 'https://static.wikitide.net/soulframewiki/1/1a/Thistle.png' },
+        
+        // GREATSWORD
+        { category: 'GREATSWORD', name: 'Needleseye', attunement: 'Courage', virtueCap: '43', image: 'https://static.wikitide.net/soulframewiki/8/82/DendritGreatSword.png' },
+        { category: 'GREATSWORD', name: 'Purity', attunement: 'Courage', virtueCap: '36', image: 'https://static.wikitide.net/soulframewiki/9/97/MendicantGreatSword.png' },
+        { category: 'GREATSWORD', name: 'The Paragon', attunement: 'Courage, Spirit, Grace', virtueCap: '114+', image: 'https://static.wikitide.net/soulframewiki/0/0d/ParagonGreatSword.png' },
+        
+        // LONG BLADE
+        { category: 'LONG BLADE', name: 'Dewelion', attunement: 'Grace', virtueCap: '22', image: 'https://static.wikitide.net/soulframewiki/f/fb/Dewelion.png' },
+        { category: 'LONG BLADE', name: 'Igne Mora', attunement: 'Courage', virtueCap: '29', image: 'https://static.wikitide.net/soulframewiki/e/eb/IgneMora.png' },
+        { category: 'LONG BLADE', name: "Marrow's Bane", attunement: 'Death', virtueCap: '110', image: '' },
+        { category: 'LONG BLADE', name: 'Nurash', attunement: 'Shadow', virtueCap: '95', image: '' },
+        { category: 'LONG BLADE', name: 'Sollos-I', attunement: 'Light', virtueCap: '100', image: '' },
+        { category: 'LONG BLADE', name: 'Stultin', attunement: 'Earth', virtueCap: '90', image: '' },
+        { category: 'LONG BLADE', name: 'Tessard', attunement: 'Steel', virtueCap: '95', image: '' },
+        { category: 'LONG BLADE', name: 'The Ivor', attunement: 'Ice', virtueCap: '100', image: '' },
+        { category: 'LONG BLADE', name: 'Veteh', attunement: 'Poison', virtueCap: '90', image: '' },
+        { category: 'LONG BLADE', name: 'Wulder', attunement: 'Nature', virtueCap: '95', image: '' },
+        
+        // MAGICK
+        { category: 'MAGICK', name: 'Gwylen', attunement: 'Arcane', virtueCap: '110', image: '' },
+        { category: 'MAGICK', name: 'The Alder', attunement: 'Nature', virtueCap: '105', image: '' },
+        { category: 'MAGICK', name: 'The Erstroot', attunement: 'Ancient', virtueCap: '115', image: '' },
+        
+        // POLEARM
+        { category: 'POLEARM', name: 'Duhk Halic', attunement: 'Dark', virtueCap: '105', image: '' },
+        { category: 'POLEARM', name: 'Gathannan', attunement: 'Storm', virtueCap: '110', image: '' },
+        { category: 'POLEARM', name: 'Rook', attunement: 'Steel', virtueCap: '100', image: '' },
+        { category: 'POLEARM', name: 'Vasp-IV', attunement: 'Tech', virtueCap: '95', image: '' },
+        
+        // SHIELD
+        { category: 'SHIELD', name: 'Bog & Myrtle', attunement: 'Nature', virtueCap: '80', image: '' },
+        { category: 'SHIELD', name: 'Oryn-Umbr', attunement: 'Shadow', virtueCap: '85', image: '' },
+        
+        // SHORT BLADE
+        { category: 'SHORT BLADE', name: 'Rivt-II', attunement: 'Tech', virtueCap: '85', image: '' },
+        { category: 'SHORT BLADE', name: 'The Royal Tines', attunement: 'Noble', virtueCap: '90', image: '' },
+        { category: 'SHORT BLADE', name: 'Unsula', attunement: 'Frost', virtueCap: '80', image: '' },
+        
+        // FLYBLADE
+        { category: 'FLYBLADE', name: 'Precklies', attunement: 'Swift', virtueCap: '90', image: '' },
+        { category: 'FLYBLADE', name: 'Skilter', attunement: 'Wind', virtueCap: '85', image: '' },
+        { category: 'FLYBLADE', name: 'Thrice Spurns', attunement: 'Triple', virtueCap: '95', image: '' },
+        
+        // MAGICK (Sidearms)
+        { category: 'MAGICK', name: 'Esthelle', attunement: 'Star', virtueCap: '75', image: '', isSidearm: true },
+        { category: 'MAGICK', name: 'Odiac', attunement: 'Mystic', virtueCap: '70', image: '', isSidearm: true },
+        
+        // SHORT BLADE (Sidearms)
+        { category: 'SHORT BLADE', name: 'Cobladh', attunement: 'Sleep', virtueCap: '65', image: '', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Grinn', attunement: 'Grim', virtueCap: '70', image: '', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Nettle', attunement: 'Thorn', virtueCap: '65', image: '', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Virdigris', attunement: 'Copper', virtueCap: '68', image: '', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Witan', attunement: 'Wisdom', virtueCap: '72', image: '', isSidearm: true },
+      ];
+
+      const [weaponData, setWeaponData] = useState(() => {
+        const saved = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('weaponData='));
+        
+        if (saved) {
+          try {
+            return JSON.parse(decodeURIComponent(saved.split('=')[1]));
+          } catch (e) {
+            return {};
+          }
+        }
+        return {};
+      });
+
+      useEffect(() => {
+        const expires = new Date();
+        expires.setFullYear(expires.getFullYear() + 1);
+        document.cookie = `weaponData=${encodeURIComponent(JSON.stringify(weaponData))}; expires=${expires.toUTCString()}; path=/`;
+      }, [weaponData]);
+
+      const toggleOwned = (weaponName) => {
+        setWeaponData(prev => ({
+          ...prev,
+          [weaponName]: {
+            ...prev[weaponName],
+            owned: !prev[weaponName]?.owned
+          }
+        }));
+      };
+
+      const updateLevel = (weaponName, level) => {
+        // Ensure level is between 0 and 30
+        let validLevel = level;
+        if (level !== '') {
+          const numLevel = parseInt(level, 10);
+          if (numLevel > 30) validLevel = '30';
+          if (numLevel < 0) validLevel = '0';
+        }
+        
+        setWeaponData(prev => ({
+          ...prev,
+          [weaponName]: {
+            ...prev[weaponName],
+            level: validLevel
+          }
+        }));
+      };
+
+      const groupedWeapons = weapons.reduce((acc, weapon) => {
+        const section = weapon.isSidearm ? 'SIDEARMS' : 'WEAPONS';
+        if (!acc[section]) acc[section] = {};
+        if (!acc[section][weapon.category]) acc[section][weapon.category] = [];
+        acc[section][weapon.category].push(weapon);
+        return acc;
+      }, {});
+
+      const renderWeaponTable = (categoryWeapons, category) => (
+        <div key={category} className="mb-8">
+          <h2 className="text-2xl font-bold text-amber-400 mb-4 border-b-2 border-amber-600 pb-2">{category}</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse bg-gray-800 shadow-lg">
+              <thead>
+                <tr className="bg-gray-700">
+                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-24">Image</th>
+                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-48">Weapon Name</th>
+                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-64">Attunement</th>
+                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-32">Virtue Cap</th>
+                  <th className="border border-gray-600 p-3 text-center text-amber-300 w-10">Owned</th>
+                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-20">Level</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categoryWeapons.map((weapon) => (
+                  <tr key={weapon.name} className="hover:bg-gray-700 transition-colors">
+                    <td className="border border-gray-600 p-2 w-24">
+                      {weapon.image ? (
+                        <img src={weapon.image} alt={weapon.name} className="w-20 h-20 object-contain rounded mx-auto" />
+                      ) : (
+                        <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs mx-auto">
+                          No Image
+                        </div>
+                      )}
+                    </td>
+                    <td className="border border-gray-600 p-3 text-gray-200 font-medium w-48">{weapon.name}</td>
+                    <td className="border border-gray-600 p-3 w-64">
+                      {renderAttunement(weapon.attunement)}
+                    </td>
+                    <td className="border border-gray-600 p-3 text-gray-300 w-32">
+                      {weapon.virtueCap || '-'}
+                    </td>
+                    <td className="border border-gray-600 p-3 text-center w-10">
+                      <button
+                        onClick={() => toggleOwned(weapon.name)}
+                        className={`w-8 h-8 rounded flex items-center justify-center transition-colors mx-auto ${
+                          weaponData[weapon.name]?.owned
+                            ? 'bg-green-600 hover:bg-green-700'
+                            : 'bg-gray-600 hover:bg-gray-500'
+                        }`}
+                      >
+                        {weaponData[weapon.name]?.owned && <Check size={20} className="text-white" />}
+                      </button>
+                    </td>
+                    <td className="border border-gray-600 p-3 w-20">
+                      <input
+                        type="number"
+                        min="0"
+                        max="30"
+                        value={weaponData[weapon.name]?.level || ''}
+                        onChange={(e) => updateLevel(weapon.name, e.target.value)}
+                        className="w-14 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-200 focus:outline-none focus:border-amber-500"
+                        placeholder="0"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen bg-gray-900 p-6">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-4xl font-bold text-amber-400 mb-8 text-center border-b-4 border-amber-600 pb-4">
+              Weapon Tracker
+            </h1>
+            
+            <div className="mb-12">
+              <h2 className="text-3xl font-bold text-amber-300 mb-6">WEAPONS</h2>
+              {Object.entries(groupedWeapons.WEAPONS || {}).map(([category, categoryWeapons]) =>
+                renderWeaponTable(categoryWeapons, category)
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-3xl font-bold text-amber-300 mb-6">SIDEARMS</h2>
+              {Object.entries(groupedWeapons.SIDEARMS || {}).map(([category, categoryWeapons]) =>
+                renderWeaponTable(categoryWeapons, category)
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<WeaponTracker />);
+  </script>
+</body>
+</html>

@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@300;400;500;600;700&family=Metamorphous&display=swap" rel="stylesheet">
+  <!-- Google API scripts for Drive integration -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -205,6 +208,11 @@
     const WeaponTracker = () => {
       const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
       const [searchTerm, setSearchTerm] = useState('');
+      // Google Drive state variables
+      const [googleTokenClient, setGoogleTokenClient] = useState(null);
+      const [accessToken, setAccessToken] = useState(null);
+      const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+      const [googleDriveStatus, setGoogleDriveStatus] = useState('');
 
       // Attunement icon mapping
       const attunementIcons = {
@@ -300,6 +308,7 @@
         return sorted;
       };
 
+      // Weapon data with Tier values
       const weapons = [
         // BOW
         { category: 'BOW', name: 'Blitzel', attunement: 'Courage', tier: 'Tier 2', smite: '2', virtueCap: '28' },
@@ -382,6 +391,24 @@
         document.cookie = `weaponData=${encodeURIComponent(JSON.stringify(weaponData))}; expires=${expires.toUTCString()}; path=/`;
       }, [weaponData]);
 
+      // Google Drive initialization
+      useEffect(() => {
+        // Initialize Google Token Client
+        if (window.google && !googleTokenClient) {
+          const client = window.google.accounts.oauth2.initTokenClient({
+            client_id: '1073437837956-281q7jfqo1b8sv8au24jq7o2ftktc7o7.apps.googleusercontent.com', // REPLACE THIS
+            scope: 'https://www.googleapis.com/auth/drive.file',
+            callback: (tokenResponse) => {
+              if (tokenResponse.access_token) {
+                setAccessToken(tokenResponse.access_token);
+                setGoogleDriveStatus('✅ Connected to Google Drive');
+              }
+            },
+          });
+          setGoogleTokenClient(client);
+        }
+      }, [googleTokenClient]);
+
       const toggleOwned = (weaponName) => {
         setWeaponData(prev => ({
           ...prev,
@@ -440,6 +467,135 @@
         };
         reader.readAsText(file);
         event.target.value = '';
+      };
+
+      // Google Drive Functions
+      const authenticateGoogleDrive = () => {
+        if (!googleTokenClient) {
+          setGoogleDriveStatus('❌ Google API not loaded. Refresh page.');
+          return;
+        }
+        
+        setIsGoogleLoading(true);
+        setGoogleDriveStatus('Opening Google authentication...');
+        
+        googleTokenClient.requestAccessToken();
+        setIsGoogleLoading(false);
+      };
+
+      // Function to save to Google Drive
+      const saveToGoogleDrive = async () => {
+        if (!accessToken) {
+          setGoogleDriveStatus('⚠️ Please connect to Google Drive first.');
+          return;
+        }
+        
+        setIsGoogleLoading(true);
+        setGoogleDriveStatus('Saving to Google Drive...');
+        
+        try {
+          const fileName = `soulframe-tracker-${new Date().toISOString().split('T')[0]}.json`;
+          const fileContent = JSON.stringify(weaponData, null, 2);
+          
+          // Create file metadata
+          const metadata = {
+            name: fileName,
+            mimeType: 'application/json',
+            parents: ['appDataFolder'] // Special folder for app data
+          };
+          
+          // Create multipart request
+          const boundary = '-------' + Date.now().toString(16);
+          const delimiter = "\r\n--" + boundary + "\r\n";
+          const close_delim = "\r\n--" + boundary + "--";
+          
+          const multipartRequestBody =
+            delimiter +
+            'Content-Type: application/json\r\n\r\n' +
+            JSON.stringify(metadata) +
+            delimiter +
+            'Content-Type: application/json\r\n\r\n' +
+            fileContent +
+            close_delim;
+          
+          const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + accessToken,
+              'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+            },
+            body: multipartRequestBody
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            setGoogleDriveStatus(`✅ Saved to Google Drive! File: ${data.name}`);
+            alert('Successfully saved to Google Drive!');
+          } else {
+            throw new Error(await response.text());
+          }
+        } catch (error) {
+          console.error('Error saving to Google Drive:', error);
+          setGoogleDriveStatus('❌ Failed to save. Try reconnecting.');
+          alert('Failed to save to Google Drive. Check console for details.');
+        } finally {
+          setIsGoogleLoading(false);
+        }
+      };
+
+      // Function to load from Google Drive using Picker
+      const loadFromGoogleDrive = () => {
+        if (!accessToken) {
+          setGoogleDriveStatus('⚠️ Please connect to Google Drive first.');
+          return;
+        }
+        
+        setIsGoogleLoading(true);
+        setGoogleDriveStatus('Opening file picker...');
+        
+        // Load the Picker API
+        gapi.load('picker', () => {
+          const picker = new google.picker.PickerBuilder()
+            .addView(google.picker.ViewId.DOCS)
+            .setOAuthToken(accessToken)
+            .setCallback(async (data) => {
+              if (data.action === google.picker.Action.PICKED) {
+                const fileId = data.docs[0].id;
+                await loadFileFromDrive(fileId);
+              }
+              setIsGoogleLoading(false);
+            })
+            .setOrigin(window.location.origin)
+            .build();
+          
+          picker.setVisible(true);
+        });
+      };
+
+      // Function to load a specific file from Drive
+      const loadFileFromDrive = async (fileId) => {
+        try {
+          setGoogleDriveStatus('Loading file...');
+          
+          const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: {
+              'Authorization': 'Bearer ' + accessToken
+            }
+          });
+          
+          if (response.ok) {
+            const imported = await response.json();
+            setWeaponData(imported);
+            setGoogleDriveStatus('✅ Data loaded from Google Drive!');
+            alert('Data imported successfully from Google Drive!');
+          } else {
+            throw new Error(await response.text());
+          }
+        } catch (error) {
+          console.error('Error loading from Google Drive:', error);
+          setGoogleDriveStatus('❌ Failed to load file.');
+          alert('Error importing data. Ensure file is valid JSON.');
+        }
       };
 
       // Filter weapons based on search term
@@ -552,11 +708,10 @@
                     <td className="border border-gray-600 p-2 md:p-3 text-center" style={{width: '80px'}}>
                       <button
                         onClick={() => toggleOwned(weapon.name)}
-                        className={`w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center transition-colors mx-auto ${
-                          weaponData[weapon.name]?.owned
+                        className={`w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center transition-colors mx-auto ${weaponData[weapon.name]?.owned
                             ? 'bg-green-600 hover:bg-green-700'
                             : 'bg-gray-600 hover:bg-gray-500'
-                        }`}
+                          }`}
                       >
                         {weaponData[weapon.name]?.owned && <Check size={20} className="text-white" />}
                       </button>
@@ -617,24 +772,97 @@
             </div>
 
             {/* Import/Export Controls */}
-            <div className="mb-6 md:mb-8 flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <button
-                onClick={exportData}
-                className="flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button"
-              >
-                <Download size={20} className="md:w-6 md:h-6" />
-                Export Progress
-              </button>
-              <label className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg cursor-pointer grenze-font text-button">
-                <Upload size={20} className="md:w-6 md:h-6" />
-                Import Progress
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={importData}
-                  className="hidden"
-                />
-              </label>
+            <div className="mb-8">
+              {/* Local Import/Export */}
+              <div className="flex gap-4 justify-center flex-wrap mb-6">
+                <button
+                  onClick={exportData}
+                  className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-lg grenze-font text-button"
+                >
+                  <Download size={20} />
+                  Export Progress
+                </button>
+                <label className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-lg cursor-pointer grenze-font text-button">
+                  <Upload size={20} />
+                  Import Progress
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={importData}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+              
+              {/* Google Drive Integration */}
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-amber-300 mb-4 metamorphous-font">Google Drive Sync</h3>
+                
+                {googleDriveStatus && (
+                  <div className="mb-4">
+                    <p className={`text-sm grenze-font ${
+                      googleDriveStatus.includes('✅') ? 'text-green-400' : 
+                      googleDriveStatus.includes('⚠️') ? 'text-yellow-400' : 
+                      googleDriveStatus.includes('❌') ? 'text-red-400' : 'text-gray-300'
+                    }`}>
+                      {googleDriveStatus}
+                    </p>
+                  </div>
+                )}
+                
+                <div className="flex gap-4 justify-center flex-wrap">
+                  {!accessToken ? (
+                    <button
+                      onClick={authenticateGoogleDrive}
+                      disabled={isGoogleLoading}
+                      className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border-2 border-green-600 text-green-400 font-medium px-6 py-3 rounded-lg transition-colors shadow-lg grenze-font text-button disabled:opacity-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v8"></path>
+                        <path d="m16 6-4 4-4-4"></path>
+                        <rect width="20" height="14" x="2" y="8" rx="2"></rect>
+                      </svg>
+                      {isGoogleLoading ? 'Connecting...' : 'Connect Google Drive'}
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={saveToGoogleDrive}
+                        disabled={isGoogleLoading}
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-lg grenze-font text-button disabled:opacity-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                          <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                          <path d="M12 18v-6"></path>
+                          <path d="m9 15 3 3 3-3"></path>
+                        </svg>
+                        {isGoogleLoading ? 'Saving...' : 'Save to Google Drive'}
+                      </button>
+                      
+                      <button
+                        onClick={loadFromGoogleDrive}
+                        disabled={isGoogleLoading}
+                        className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-lg grenze-font text-button disabled:opacity-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <path d="M12 18v-6"></path>
+                          <path d="m9 15 3-3 3 3"></path>
+                        </svg>
+                        {isGoogleLoading ? 'Loading...' : 'Load from Google Drive'}
+                      </button>
+                    </>
+                  )}
+                </div>
+                
+                {accessToken && (
+                  <p className="text-xs text-gray-500 mt-3 grenze-font">
+                    Connected to Google Drive. Files are saved in the app's private folder (not visible in your main Drive).
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="mb-8 md:mb-12">

@@ -22,37 +22,140 @@
     input, button, th, td {
       font-family: 'Grenze Gotisch', serif;
     }
-    /* Increased base font size */
+    /* Base font sizes */
     html {
-      font-size: 18px;
+      font-size: 16px;
     }
-    /* Larger text for specific elements */
-    .text-larger {
-      font-size: 1.1rem;
+    
+    @media (min-width: 768px) {
+      html {
+        font-size: 18px;
+      }
     }
+    
+    /* Responsive font size classes */
     .text-table-header {
-      font-size: 1.2rem;
+      font-size: 0.9rem;
     }
+    
+    @media (min-width: 768px) {
+      .text-table-header {
+        font-size: 1.2rem;
+      }
+    }
+    
     .text-table-cell {
-      font-size: 1.1rem;
+      font-size: 0.9rem;
     }
+    
+    @media (min-width: 768px) {
+      .text-table-cell {
+        font-size: 1.1rem;
+      }
+    }
+    
     .text-category-title {
-      font-size: 1.8rem;
-    }
-    .text-section-title {
-      font-size: 2.2rem;
-    }
-    .text-main-title {
-      font-size: 3.5rem;
-    }
-    .text-search {
-      font-size: 1.3rem;
-    }
-    .text-button {
       font-size: 1.2rem;
     }
+    
+    @media (min-width: 768px) {
+      .text-category-title {
+        font-size: 1.8rem;
+      }
+    }
+    
+    .text-section-title {
+      font-size: 1.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .text-section-title {
+        font-size: 2.2rem;
+      }
+    }
+    
+    .text-main-title {
+      font-size: 2rem;
+    }
+    
+    @media (min-width: 768px) {
+      .text-main-title {
+        font-size: 3.5rem;
+      }
+    }
+    
+    .text-search {
+      font-size: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .text-search {
+        font-size: 1.3rem;
+      }
+    }
+    
+    .text-button {
+      font-size: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .text-button {
+        font-size: 1.2rem;
+      }
+    }
+    
     .text-footer {
-      font-size: 1.1rem;
+      font-size: 0.9rem;
+    }
+    
+    @media (min-width: 768px) {
+      .text-footer {
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* Mobile table improvements */
+    .mobile-table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-left: -1rem;
+      margin-right: -1rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .mobile-table-container {
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    
+    /* Adjust table column widths for mobile */
+    .table-responsive {
+      min-width: 800px;
+    }
+    
+    @media (min-width: 768px) {
+      .table-responsive {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+    
+    /* Mobile spacing adjustments */
+    .mobile-padding {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .mobile-padding {
+        padding-left: 0;
+        padding-right: 0;
+      }
     }
   </style>
 </head>
@@ -143,11 +246,11 @@
                   <img 
                     src={attunementIcons[attunement]} 
                     alt={attunement}
-                    className="w-7 h-7 inline-block"
+                    className="w-6 h-6 md:w-7 md:h-7 inline-block"
                     title={attunement}
                   />
                 )}
-                <span className="text-base text-gray-300 grenze-font">{attunement}</span>
+                <span className="text-sm md:text-base text-gray-300 grenze-font">{attunement}</span>
               </div>
             ))}
           </div>
@@ -197,7 +300,6 @@
         return sorted;
       };
 
-      // Weapon data with Tier values
       const weapons = [
         // BOW
         { category: 'BOW', name: 'Blitzel', attunement: 'Courage', tier: 'Tier 2', smite: '2', virtueCap: '28' },
@@ -359,59 +461,59 @@
       const renderWeaponTable = (categoryWeapons, category) => (
         <div key={category} className="mb-8">
           <h2 className="font-bold text-amber-400 mb-4 border-b-2 border-amber-600 pb-2 metamorphous-font text-category-title">{category}</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse bg-gray-800 shadow-lg table-fixed">
+          <div className="mobile-table-container">
+            <table className="w-full border-collapse bg-gray-800 shadow-lg table-responsive">
               <thead>
                 <tr className="bg-gray-700">
-                  <th className="border border-gray-600 p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '120px'}}>Image</th>
-                  <th className="border border-gray-600 p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '200px'}}>Weapon Name</th>
-                  <th className="border border-gray-600 p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '250px'}}>Attunement</th>
+                  <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '100px'}}>Image</th>
+                  <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '150px'}}>Weapon Name</th>
+                  <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '200px'}}>Attunement</th>
                   <th 
-                    className="border border-gray-600 p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
-                    style={{width: '100px'}}
+                    className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
+                    style={{width: '80px'}}
                     onClick={() => handleSort('tier', category)}
                   >
                     <div className="flex items-center justify-center gap-1">
                       Tier
                       {sortConfig.key === `${category}-tier` && (
-                        <span className="text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                        <span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                       )}
                     </div>
                   </th>
                   <th 
-                    className="border border-gray-600 p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
-                    style={{width: '80px'}}
+                    className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
+                    style={{width: '70px'}}
                     onClick={() => handleSort('smite', category)}
                   >
                     <div className="flex items-center justify-center gap-1">
                       Smite %
                       {sortConfig.key === `${category}-smite` && (
-                        <span className="text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                        <span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                       )}
                     </div>
                   </th>
                   <th 
-                    className="border border-gray-600 p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
-                    style={{width: '120px'}}
+                    className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
+                    style={{width: '100px'}}
                     onClick={() => handleSort('virtueCap', category)}
                   >
                     <div className="flex items-center justify-center gap-1">
                       Virtue Cap
                       {sortConfig.key === `${category}-virtueCap` && (
-                        <span className="text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                        <span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                       )}
                     </div>
                   </th>
-                  <th className="border border-gray-600 p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '100px'}}>Owned</th>
+                  <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '80px'}}>Owned</th>
                   <th 
-                    className="border border-gray-600 p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
-                    style={{width: '100px'}}
+                    className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
+                    style={{width: '80px'}}
                     onClick={() => handleSort('level', category)}
                   >
                     <div className="flex items-center justify-center gap-1">
                       Level
                       {sortConfig.key === `${category}-level` && (
-                        <span className="text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                        <span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                       )}
                     </div>
                   </th>
@@ -420,53 +522,53 @@
               <tbody>
                 {sortWeapons(categoryWeapons, category).map((weapon) => (
                   <tr key={weapon.name} className="hover:bg-gray-700 transition-colors">
-                    <td className="border border-gray-600 p-2" style={{width: '120px'}}>
+                    <td className="border border-gray-600 p-1 md:p-2" style={{width: '100px'}}>
                       <img 
                         src={getImagePath(weapon.category, weapon.name, weapon.isSidearm)} 
                         alt={weapon.name} 
-                        className="w-20 h-20 object-contain rounded mx-auto"
+                        className="w-14 h-14 md:w-20 md:h-20 object-contain rounded mx-auto"
                         onError={(e) => {
                           e.target.style.display = 'none';
                           e.target.nextSibling.style.display = 'flex';
                         }}
                       />
-                      <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-base mx-auto" style={{display: 'none'}}>
+                      <div className="w-14 h-14 md:w-20 md:h-20 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs md:text-base mx-auto" style={{display: 'none'}}>
                         No Image
                       </div>
                     </td>
-                    <td className="border border-gray-600 p-3 text-gray-200 font-medium text-center grenze-font text-table-cell" style={{width: '200px'}}>{weapon.name}</td>
-                    <td className="border border-gray-600 p-3" style={{width: '250px'}}>
+                    <td className="border border-gray-600 p-2 md:p-3 text-gray-200 font-medium text-center grenze-font text-table-cell" style={{width: '150px'}}>{weapon.name}</td>
+                    <td className="border border-gray-600 p-2 md:p-3" style={{width: '200px'}}>
                       {renderAttunement(weapon.attunement)}
                     </td>
-                    <td className="border border-gray-600 p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '100px'}}>
+                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '80px'}}>
                       {weapon.tier || '-'}
                     </td>
-                    <td className="border border-gray-600 p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '80px'}}>
+                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '70px'}}>
                       {weapon.smite || '-'}
                     </td>
-                    <td className="border border-gray-600 p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '120px'}}>
+                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '100px'}}>
                       {weapon.virtueCap || '-'}
                     </td>
-                    <td className="border border-gray-600 p-3 text-center" style={{width: '100px'}}>
+                    <td className="border border-gray-600 p-2 md:p-3 text-center" style={{width: '80px'}}>
                       <button
                         onClick={() => toggleOwned(weapon.name)}
-                        className={`w-10 h-10 rounded flex items-center justify-center transition-colors mx-auto ${
+                        className={`w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center transition-colors mx-auto ${
                           weaponData[weapon.name]?.owned
                             ? 'bg-green-600 hover:bg-green-700'
                             : 'bg-gray-600 hover:bg-gray-500'
                         }`}
                       >
-                        {weaponData[weapon.name]?.owned && <Check size={24} className="text-white" />}
+                        {weaponData[weapon.name]?.owned && <Check size={20} className="text-white" />}
                       </button>
                     </td>
-                    <td className="border border-gray-600 p-3" style={{width: '100px'}}>
+                    <td className="border border-gray-600 p-2 md:p-3" style={{width: '80px'}}>
                       <input
                         type="number"
                         min="0"
                         max="30"
                         value={weaponData[weapon.name]?.level || ''}
                         onChange={(e) => updateLevel(weapon.name, e.target.value)}
-                        className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 text-gray-200 text-center focus:outline-none focus:border-amber-500 grenze-font text-table-cell"
+                        className="w-full bg-gray-700 border border-gray-600 rounded px-1 md:px-2 py-1 md:py-2 text-gray-200 text-center focus:outline-none focus:border-amber-500 grenze-font text-table-cell"
                         placeholder="0"
                       />
                     </td>
@@ -479,52 +581,52 @@
       );
 
       return (
-        <div className="min-h-screen bg-gray-900 p-6 flex flex-col">
-          <div className="max-w-7xl mx-auto flex-grow w-full">
-            <h1 className="font-bold text-amber-400 mb-8 text-center border-b-4 border-amber-600 pb-4 metamorphous-font text-main-title">
+        <div className="min-h-screen bg-gray-900 p-4 md:p-6 flex flex-col">
+          <div className="max-w-7xl mx-auto flex-grow w-full mobile-padding">
+            <h1 className="font-bold text-amber-400 mb-6 md:mb-8 text-center border-b-2 md:border-b-4 border-amber-600 pb-3 md:pb-4 metamorphous-font text-main-title">
               Soulframe Weapon Tracker
             </h1>
             
             {/* Search Bar */}
-            <div className="mb-8 relative">
+            <div className="mb-6 md:mb-8 relative">
               <div className="relative max-w-2xl mx-auto">
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search weapons by name, category, attunement, or tier..."
-                  className="w-full bg-gray-800 border-2 border-amber-600 rounded-lg px-4 py-3 pl-12 text-gray-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 grenze-font text-search"
+                  placeholder="Search weapons..."
+                  className="w-full bg-gray-800 border-2 border-amber-600 rounded-lg px-4 py-2 md:py-3 pl-10 md:pl-12 text-gray-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 grenze-font text-search"
                 />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-amber-400">
-                  <SearchIcon size={28} />
+                <div className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-amber-400">
+                  <SearchIcon size={20} className="md:w-6 md:h-6" />
                 </div>
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 text-xl"
+                    className="absolute right-3 md:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 text-lg"
                   >
                     ✕
                   </button>
                 )}
               </div>
               {searchTerm && (
-                <p className="text-gray-400 text-center mt-3 grenze-font text-larger">
+                <p className="text-gray-400 text-center mt-2 grenze-font text-sm md:text-base">
                   Showing {filteredWeapons.length} weapon{filteredWeapons.length !== 1 ? 's' : ''} matching "{searchTerm}"
                 </p>
               )}
             </div>
 
             {/* Import/Export Controls */}
-            <div className="mb-8 flex gap-4 justify-center flex-wrap">
+            <div className="mb-6 md:mb-8 flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
               <button
                 onClick={exportData}
-                className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-lg grenze-font text-button"
+                className="flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button"
               >
-                <Download size={24} />
+                <Download size={20} className="md:w-6 md:h-6" />
                 Export Progress
               </button>
-              <label className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-lg cursor-pointer grenze-font text-button">
-                <Upload size={24} />
+              <label className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg cursor-pointer grenze-font text-button">
+                <Upload size={20} className="md:w-6 md:h-6" />
                 Import Progress
                 <input
                   type="file"
@@ -535,15 +637,15 @@
               </label>
             </div>
 
-            <div className="mb-12">
-              <h2 className="font-bold text-amber-300 mb-6 metamorphous-font text-section-title">WEAPONS</h2>
+            <div className="mb-8 md:mb-12">
+              <h2 className="font-bold text-amber-300 mb-4 md:mb-6 metamorphous-font text-section-title">WEAPONS</h2>
               {Object.entries(groupedWeapons.WEAPONS || {}).map(([category, categoryWeapons]) =>
                 renderWeaponTable(categoryWeapons, category)
               )}
             </div>
 
             <div>
-              <h2 className="font-bold text-amber-300 mb-6 metamorphous-font text-section-title">SIDEARMS</h2>
+              <h2 className="font-bold text-amber-300 mb-4 md:mb-6 metamorphous-font text-section-title">SIDEARMS</h2>
               {Object.entries(groupedWeapons.SIDEARMS || {}).map(([category, categoryWeapons]) =>
                 renderWeaponTable(categoryWeapons, category)
               )}
@@ -551,24 +653,24 @@
           </div>
 
           {/* Footer */}
-          <footer className="mt-12 pt-8 border-t border-gray-700">
-            <div className="max-w-7xl mx-auto text-center">
+          <footer className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-gray-700">
+            <div className="max-w-7xl mx-auto text-center mobile-padding">
               <p className="text-gray-400 mb-3 grenze-font text-footer">
                 Soulframe Weapon Tracker - Track your weapon collection and progress
               </p>
-              <div className="flex justify-center items-center gap-6 text-gray-500 grenze-font text-footer">
+              <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-6 text-gray-500 grenze-font text-sm md:text-footer">
                 <a 
                   href="https://github.com/driftywinds/soulframe-weapon-tracker" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 hover:text-amber-400 transition-colors"
                 >
-                  <Github size={20} />
+                  <Github size={16} className="md:w-5 md:h-5" />
                   GitHub Repository
                 </a>
-                <span>•</span>
+                <span className="hidden md:inline">•</span>
                 <span>Data stored locally in your browser</span>
-                <span>•</span>
+                <span className="hidden md:inline">•</span>
                 <a 
                   href="https://wiki.avakot.org/" 
                   target="_blank" 
@@ -578,7 +680,7 @@
                   All data sourced from Avakot.org Soulframe Wiki
                 </a>
               </div>
-              <p className="text-gray-600 mt-3 grenze-font text-footer">
+              <p className="text-gray-600 mt-3 grenze-font text-xs md:text-footer">
                 Images and game content © Digital Extremes. This is an unofficial fan-made tracker.
               </p>
             </div>

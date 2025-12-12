@@ -8,8 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@300;400;500;600;700&family=Metamorphous&display=swap" rel="stylesheet">
-  <!-- Google API scripts for Drive integration -->
-  <script src="https://apis.google.com/js/api.js"></script>
+  <!-- Google Identity Services for OAuth -->
   <script src="https://accounts.google.com/gsi/client"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -543,33 +542,66 @@
         }
       };
 
-      // Function to load from Google Drive using Picker
-      const loadFromGoogleDrive = () => {
+      // Function to load from Google Drive using simple file list
+      const loadFromGoogleDrive = async () => {
         if (!accessToken) {
           setGoogleDriveStatus('⚠️ Please connect to Google Drive first.');
           return;
         }
         
         setIsGoogleLoading(true);
-        setGoogleDriveStatus('Opening file picker...');
+        setGoogleDriveStatus('Loading file list...');
         
-        // Load the Picker API
-        gapi.load('picker', () => {
-          const picker = new google.picker.PickerBuilder()
-            .addView(google.picker.ViewId.DOCS)
-            .setOAuthToken(accessToken)
-            .setCallback(async (data) => {
-              if (data.action === google.picker.Action.PICKED) {
-                const fileId = data.docs[0].id;
-                await loadFileFromDrive(fileId);
-              }
-              setIsGoogleLoading(false);
-            })
-            .setOrigin(window.location.origin)
-            .build();
+        try {
+          // List files from appDataFolder
+          const listResponse = await fetch('https://www.googleapis.com/drive/v3/files?q=\'appDataFolder\'+in+parents&orderBy=modifiedTime+desc', {
+            headers: {
+              'Authorization': 'Bearer ' + accessToken
+            }
+          });
           
-          picker.setVisible(true);
-        });
+          if (!listResponse.ok) {
+            throw new Error('Failed to list files: ' + await listResponse.text());
+          }
+          
+          const listData = await listResponse.json();
+          
+          if (!listData.files || listData.files.length === 0) {
+            setIsGoogleLoading(false);
+            setGoogleDriveStatus('❌ No saved files found in Google Drive.');
+            alert('No saved files found in Google Drive.');
+            return;
+          }
+          
+          // Create a simple selection dialog
+          const fileNames = listData.files.map(f => f.name);
+          const selectedFileName = prompt(
+            `Select a file to load:\n\n${fileNames.map((name, i) => `${i + 1}. ${name}`).join('\n')}\n\nEnter the number (1-${fileNames.length}):`
+          );
+          
+          if (!selectedFileName) {
+            setIsGoogleLoading(false);
+            setGoogleDriveStatus('File selection cancelled.');
+            return;
+          }
+          
+          const selectedIndex = parseInt(selectedFileName) - 1;
+          if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= fileNames.length) {
+            setIsGoogleLoading(false);
+            setGoogleDriveStatus('❌ Invalid selection.');
+            alert('Please enter a valid number.');
+            return;
+          }
+          
+          const selectedFileId = listData.files[selectedIndex].id;
+          await loadFileFromDrive(selectedFileId);
+          
+        } catch (error) {
+          console.error('Error loading from Google Drive:', error);
+          setGoogleDriveStatus('❌ Failed to load files. Try reconnecting.');
+          alert('Error loading files from Google Drive. Check console for details.');
+          setIsGoogleLoading(false);
+        }
       };
 
       // Function to load a specific file from Drive
@@ -592,9 +624,11 @@
             throw new Error(await response.text());
           }
         } catch (error) {
-          console.error('Error loading from Google Drive:', error);
+          console.error('Error loading file:', error);
           setGoogleDriveStatus('❌ Failed to load file.');
           alert('Error importing data. Ensure file is valid JSON.');
+        } finally {
+          setIsGoogleLoading(false);
         }
       };
 

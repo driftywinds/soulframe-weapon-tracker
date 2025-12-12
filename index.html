@@ -15,25 +15,39 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // Lucide React Check icon component
+    // Lucide React icons
     const Check = ({ size = 24, className = "" }) => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
     );
 
+    const Download = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+    );
+
+    const Upload = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+    );
+
+    const Github = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+        <path d="M9 18c-4.51 2-5-2-7-2"></path>
+      </svg>
+    );
+
     const WeaponTracker = () => {
+      const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
       // Attunement icon mapping
       const attunementIcons = {
         'Courage': 'https://static.wikitide.net/soulframewiki/thumb/c/ca/CouragePip.png/100px-CouragePip.png',
@@ -41,15 +55,33 @@
         'Grace': 'https://static.wikitide.net/soulframewiki/thumb/f/ff/GracePip.png/100px-GracePip.png'
       };
 
+      // Function to get image path from assets folder
+      const getImagePath = (category, weaponName, isSidearm) => {
+        const categoryMap = {
+          'BOW': 'bow',
+          'GREATSWORD': 'greatsword',
+          'LONG BLADE': 'longblade',
+          'MAGICK': isSidearm ? 'magick_s' : 'magick',
+          'POLEARM': 'polearm',
+          'SHIELD': 'shield',
+          'SHORT BLADE': isSidearm ? 'shortblade_s' : 'shortblade',
+          'FLYBLADE': 'flyblade'
+        };
+        
+        const folder = categoryMap[category] || category.toLowerCase().replace(' ', '');
+        // Replace special characters and spaces in weapon name
+        const fileName = weaponName.replace(/[']/g, '').replace(/\s+/g, '');
+        return `assets/weapons/${folder}/${fileName}.png`;
+      };
+
       // Function to render attunement with icons
       const renderAttunement = (attunementString) => {
         if (!attunementString) return '-';
         
-        // Split by comma to handle multiple attunements
         const attunements = attunementString.split(',').map(a => a.trim());
         
         return (
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center justify-center gap-1 flex-wrap">
             {attunements.map((attunement, index) => (
               <div key={index} className="flex items-center gap-1">
                 {attunementIcons[attunement] && (
@@ -67,66 +99,105 @@
         );
       };
 
-      // WEBSITE OWNER: Edit attunement and virtueCap values here
+      // Sorting function
+      const handleSort = (key, category) => {
+        let direction = 'asc';
+        if (sortConfig.key === `${category}-${key}` && sortConfig.direction === 'asc') {
+          direction = 'desc';
+        }
+        setSortConfig({ key: `${category}-${key}`, direction });
+      };
+
+      const sortWeapons = (categoryWeapons, category) => {
+        if (!sortConfig.key || !sortConfig.key.startsWith(`${category}-`)) {
+          return categoryWeapons;
+        }
+
+        const key = sortConfig.key.replace(`${category}-`, '');
+        const sorted = [...categoryWeapons].sort((a, b) => {
+          let aValue, bValue;
+
+          if (key === 'smite') {
+            aValue = parseInt(a.smite) || 0;
+            bValue = parseInt(b.smite) || 0;
+          } else if (key === 'virtueCap') {
+            aValue = parseInt(a.virtueCap) || 0;
+            bValue = parseInt(b.virtueCap) || 0;
+          } else if (key === 'level') {
+            aValue = parseInt(weaponData[a.name]?.level) || 0;
+            bValue = parseInt(weaponData[b.name]?.level) || 0;
+          }
+
+          if (sortConfig.direction === 'asc') {
+            return aValue - bValue;
+          } else {
+            return bValue - aValue;
+          }
+        });
+
+        return sorted;
+      };
+
+      // Weapon data
       const weapons = [
         // BOW
-        { category: 'BOW', name: 'Blitzel', attunement: 'Courage', virtueCap: '28', image: 'https://static.wikitide.net/soulframewiki/6/63/Blitzel.png' },
-        { category: 'BOW', name: 'Juniper', attunement: 'Grace', virtueCap: '29', image: 'https://static.wikitide.net/soulframewiki/9/9a/Juniper.png' },
-        { category: 'BOW', name: 'The Starling', attunement: 'Grace', virtueCap: '30', image: 'https://static.wikitide.net/soulframewiki/5/55/StarlingBow.png' },
-        { category: 'BOW', name: 'Thistle', attunement: 'Grace', virtueCap: '36', image: 'https://static.wikitide.net/soulframewiki/1/1a/Thistle.png' },
+        { category: 'BOW', name: 'Blitzel', attunement: 'Courage', smite: '2', virtueCap: '28' },
+        { category: 'BOW', name: 'Juniper', attunement: 'Grace', smite: '6', virtueCap: '29' },
+        { category: 'BOW', name: 'The Starling', attunement: 'Grace', smite: '4', virtueCap: '30' },
+        { category: 'BOW', name: 'Thistle', attunement: 'Grace', smite: '5', virtueCap: '36' },
         
         // GREATSWORD
-        { category: 'GREATSWORD', name: 'Needleseye', attunement: 'Courage', virtueCap: '43', image: 'https://static.wikitide.net/soulframewiki/8/82/DendritGreatSword.png' },
-        { category: 'GREATSWORD', name: 'Purity', attunement: 'Courage', virtueCap: '36', image: 'https://static.wikitide.net/soulframewiki/9/97/MendicantGreatSword.png' },
-        { category: 'GREATSWORD', name: 'The Paragon', attunement: 'Courage, Spirit, Grace', virtueCap: '114+', image: 'https://static.wikitide.net/soulframewiki/0/0d/ParagonGreatSword.png' },
+        { category: 'GREATSWORD', name: 'Needleseye', attunement: 'Courage', smite: '5', virtueCap: '43' },
+        { category: 'GREATSWORD', name: 'Purity', attunement: 'Courage', smite: '6', virtueCap: '36' },
+        { category: 'GREATSWORD', name: 'The Paragon', attunement: 'Courage, Spirit, Grace', smite: '7', virtueCap: '114+' },
         
         // LONG BLADE
-        { category: 'LONG BLADE', name: 'Dewelion', attunement: 'Grace', virtueCap: '22', image: 'https://static.wikitide.net/soulframewiki/f/fb/Dewelion.png' },
-        { category: 'LONG BLADE', name: 'Igne Mora', attunement: 'Courage', virtueCap: '29', image: 'https://static.wikitide.net/soulframewiki/e/eb/IgneMora.png' },
-        { category: 'LONG BLADE', name: "Marrow's Bane", attunement: 'Courage', virtueCap: '27', image: 'https://static.wikitide.net/soulframewiki/4/40/MarrowsBane.png' },
-        { category: 'LONG BLADE', name: 'Nurash', attunement: 'Courage', virtueCap: '26', image: 'https://static.wikitide.net/soulframewiki/5/5f/Nurash.png' },
-        { category: 'LONG BLADE', name: 'Sollos-I', attunement: 'Spirit', virtueCap: '27', image: 'https://static.wikitide.net/soulframewiki/e/e3/SollosI.png' },
-        { category: 'LONG BLADE', name: 'Stultin', attunement: 'Earth', virtueCap: '90', image: '' },
-        { category: 'LONG BLADE', name: 'Tessard', attunement: 'Steel', virtueCap: '95', image: '' },
-        { category: 'LONG BLADE', name: 'The Ivor', attunement: 'Ice', virtueCap: '100', image: '' },
-        { category: 'LONG BLADE', name: 'Veteh', attunement: 'Poison', virtueCap: '90', image: '' },
-        { category: 'LONG BLADE', name: 'Wulder', attunement: 'Nature', virtueCap: '95', image: '' },
+        { category: 'LONG BLADE', name: 'Dewelion', attunement: 'Grace', smite: '6', virtueCap: '22' },
+        { category: 'LONG BLADE', name: 'Igne Mora', attunement: 'Courage', smite: '1', virtueCap: '29' },
+        { category: 'LONG BLADE', name: "Marrow's Bane", attunement: 'Courage', smite: '5', virtueCap: '27' },
+        { category: 'LONG BLADE', name: 'Nurash', attunement: 'Courage', smite: '5', virtueCap: '26' },
+        { category: 'LONG BLADE', name: 'Sollos-I', attunement: 'Spirit', smite: '4', virtueCap: '27' },
+        { category: 'LONG BLADE', name: 'Stultin', attunement: 'Grace', smite: '3', virtueCap: '33' },
+        { category: 'LONG BLADE', name: 'Tessard', attunement: 'Spirit', smite: '2', virtueCap: '25' },
+        { category: 'LONG BLADE', name: 'The Ivor', attunement: 'Courage', smite: '4', virtueCap: '29' },
+        { category: 'LONG BLADE', name: 'Vetch', attunement: 'Courage', smite: '3', virtueCap: '28' },
+        { category: 'LONG BLADE', name: 'Wulder', attunement: 'Courage', smite: '3', virtueCap: '36' },
         
         // MAGICK
-        { category: 'MAGICK', name: 'Gwylen', attunement: 'Arcane', virtueCap: '110', image: '' },
-        { category: 'MAGICK', name: 'The Alder', attunement: 'Nature', virtueCap: '105', image: '' },
-        { category: 'MAGICK', name: 'The Erstroot', attunement: 'Ancient', virtueCap: '115', image: '' },
+        { category: 'MAGICK', name: 'Gwylen', attunement: 'Spirit', smite: '6', virtueCap: '32' },
+        { category: 'MAGICK', name: 'The Alder', attunement: 'Spirit', smite: '6', virtueCap: '27' },
+        { category: 'MAGICK', name: 'The Erstroot', attunement: 'Spirit', smite: '6', virtueCap: '27' },
         
         // POLEARM
-        { category: 'POLEARM', name: 'Duhk Halic', attunement: 'Dark', virtueCap: '105', image: '' },
-        { category: 'POLEARM', name: 'Gathannan', attunement: 'Storm', virtueCap: '110', image: '' },
-        { category: 'POLEARM', name: 'Rook', attunement: 'Steel', virtueCap: '100', image: '' },
-        { category: 'POLEARM', name: 'Vasp-IV', attunement: 'Tech', virtueCap: '95', image: '' },
+        { category: 'POLEARM', name: 'Duhk Halic', attunement: 'Courage', smite: '4', virtueCap: '39' },
+        { category: 'POLEARM', name: 'Gathannan', attunement: 'Spirit', smite: '4', virtueCap: '35' },
+        { category: 'POLEARM', name: 'Rook', attunement: 'Spirit', smite: '2', virtueCap: '40' },
+        { category: 'POLEARM', name: 'Vasp-IV', attunement: 'Courage', smite: '5', virtueCap: '58' },
         
         // SHIELD
-        { category: 'SHIELD', name: 'Bog & Myrtle', attunement: 'Nature', virtueCap: '80', image: '' },
-        { category: 'SHIELD', name: 'Oryn-Umbr', attunement: 'Shadow', virtueCap: '85', image: '' },
+        { category: 'SHIELD', name: 'Bog & Myrtle', attunement: 'Grace', smite: '2', virtueCap: '26' },
+        { category: 'SHIELD', name: 'Oryn-Umbr', attunement: 'Courage', smite: '5', virtueCap: '25' },
         
         // SHORT BLADE
-        { category: 'SHORT BLADE', name: 'Rivt-II', attunement: 'Tech', virtueCap: '85', image: '' },
-        { category: 'SHORT BLADE', name: 'The Royal Tines', attunement: 'Noble', virtueCap: '90', image: '' },
-        { category: 'SHORT BLADE', name: 'Unsula', attunement: 'Frost', virtueCap: '80', image: '' },
+        { category: 'SHORT BLADE', name: 'Rivt-II', attunement: 'Grace', smite: '4', virtueCap: '26' },
+        { category: 'SHORT BLADE', name: 'The Royal Tines', attunement: 'Spirit', smite: '6', virtueCap: '17' },
+        { category: 'SHORT BLADE', name: 'Unsula', attunement: 'Spirit', smite: '5', virtueCap: '17' },
         
-        // FLYBLADE
-        { category: 'FLYBLADE', name: 'Precklies', attunement: 'Swift', virtueCap: '90', image: '' },
-        { category: 'FLYBLADE', name: 'Skilter', attunement: 'Wind', virtueCap: '85', image: '' },
-        { category: 'FLYBLADE', name: 'Thrice Spurns', attunement: 'Triple', virtueCap: '95', image: '' },
+        // FLYBLADE (Sidearms)
+        { category: 'FLYBLADE', name: 'Precklies', attunement: 'Courage', smite: '4', virtueCap: '25', isSidearm: true },
+        { category: 'FLYBLADE', name: 'Skilter', attunement: 'Grace', smite: '3', virtueCap: '19', isSidearm: true },
+        { category: 'FLYBLADE', name: 'Thrice Spurns', attunement: 'Courage', smite: '4', virtueCap: '21', isSidearm: true },
         
         // MAGICK (Sidearms)
-        { category: 'MAGICK', name: 'Esthelle', attunement: 'Star', virtueCap: '75', image: '', isSidearm: true },
-        { category: 'MAGICK', name: 'Odiac', attunement: 'Mystic', virtueCap: '70', image: '', isSidearm: true },
+        { category: 'MAGICK', name: 'Esthelle', attunement: 'Spirit', smite: '9', virtueCap: '22', isSidearm: true },
+        { category: 'MAGICK', name: 'Odiac', attunement: 'Spirit', smite: '6', virtueCap: '21', isSidearm: true },
         
         // SHORT BLADE (Sidearms)
-        { category: 'SHORT BLADE', name: 'Cobladh', attunement: 'Sleep', virtueCap: '65', image: '', isSidearm: true },
-        { category: 'SHORT BLADE', name: 'Grinn', attunement: 'Grim', virtueCap: '70', image: '', isSidearm: true },
-        { category: 'SHORT BLADE', name: 'Nettle', attunement: 'Thorn', virtueCap: '65', image: '', isSidearm: true },
-        { category: 'SHORT BLADE', name: 'Virdigris', attunement: 'Copper', virtueCap: '68', image: '', isSidearm: true },
-        { category: 'SHORT BLADE', name: 'Witan', attunement: 'Wisdom', virtueCap: '72', image: '', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Cobladh', attunement: 'Grace', smite: '4', virtueCap: '26', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Grinn', attunement: 'Courage', smite: '6', virtueCap: '23', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Nettle', attunement: 'Grace', smite: '3', virtueCap: '32', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Virdigris', attunement: 'Spirit', smite: '4', virtueCap: '24', isSidearm: true },
+        { category: 'SHORT BLADE', name: 'Witan', attunement: 'Courage', smite: '5', virtueCap: '23', isSidearm: true },
       ];
 
       const [weaponData, setWeaponData] = useState(() => {
@@ -161,7 +232,6 @@
       };
 
       const updateLevel = (weaponName, level) => {
-        // Ensure level is between 0 and 30
         let validLevel = level;
         if (level !== '') {
           const numLevel = parseInt(level, 10);
@@ -178,6 +248,39 @@
         }));
       };
 
+      // Export function
+      const exportData = () => {
+        const dataStr = JSON.stringify(weaponData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `soulframe-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      };
+
+      // Import function
+      const importData = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const imported = JSON.parse(e.target.result);
+            setWeaponData(imported);
+            alert('Data imported successfully!');
+          } catch (error) {
+            alert('Error importing data. Please ensure the file is a valid backup file.');
+          }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+      };
+
       const groupedWeapons = weapons.reduce((acc, weapon) => {
         const section = weapon.isSidearm ? 'SIDEARMS' : 'WEAPONS';
         if (!acc[section]) acc[section] = {};
@@ -190,37 +293,79 @@
         <div key={category} className="mb-8">
           <h2 className="text-2xl font-bold text-amber-400 mb-4 border-b-2 border-amber-600 pb-2">{category}</h2>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse bg-gray-800 shadow-lg">
+            <table className="w-full border-collapse bg-gray-800 shadow-lg table-fixed">
               <thead>
                 <tr className="bg-gray-700">
-                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-24">Image</th>
-                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-48">Weapon Name</th>
-                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-64">Attunement</th>
-                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-32">Virtue Cap</th>
-                  <th className="border border-gray-600 p-3 text-center text-amber-300 w-10">Owned</th>
-                  <th className="border border-gray-600 p-3 text-left text-amber-300 w-20">Level</th>
+                  <th className="border border-gray-600 p-3 text-center text-amber-300" style={{width: '120px'}}>Image</th>
+                  <th className="border border-gray-600 p-3 text-center text-amber-300" style={{width: '200px'}}>Weapon Name</th>
+                  <th className="border border-gray-600 p-3 text-center text-amber-300" style={{width: '250px'}}>Attunement</th>
+                  <th 
+                    className="border border-gray-600 p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none" 
+                    style={{width: '80px'}}
+                    onClick={() => handleSort('smite', category)}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Smite %
+                      {sortConfig.key === `${category}-smite` && (
+                        <span className="text-xs">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="border border-gray-600 p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none" 
+                    style={{width: '120px'}}
+                    onClick={() => handleSort('virtueCap', category)}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Virtue Cap
+                      {sortConfig.key === `${category}-virtueCap` && (
+                        <span className="text-xs">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
+                  </th>
+                  <th className="border border-gray-600 p-3 text-center text-amber-300" style={{width: '100px'}}>Owned</th>
+                  <th 
+                    className="border border-gray-600 p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none" 
+                    style={{width: '100px'}}
+                    onClick={() => handleSort('level', category)}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Level
+                      {sortConfig.key === `${category}-level` && (
+                        <span className="text-xs">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {categoryWeapons.map((weapon) => (
+                {sortWeapons(categoryWeapons, category).map((weapon) => (
                   <tr key={weapon.name} className="hover:bg-gray-700 transition-colors">
-                    <td className="border border-gray-600 p-2 w-24">
-                      {weapon.image ? (
-                        <img src={weapon.image} alt={weapon.name} className="w-20 h-20 object-contain rounded mx-auto" />
-                      ) : (
-                        <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs mx-auto">
-                          No Image
-                        </div>
-                      )}
+                    <td className="border border-gray-600 p-2" style={{width: '120px'}}>
+                      <img 
+                        src={getImagePath(weapon.category, weapon.name, weapon.isSidearm)} 
+                        alt={weapon.name} 
+                        className="w-20 h-20 object-contain rounded mx-auto"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs mx-auto" style={{display: 'none'}}>
+                        No Image
+                      </div>
                     </td>
-                    <td className="border border-gray-600 p-3 text-gray-200 font-medium w-48">{weapon.name}</td>
-                    <td className="border border-gray-600 p-3 w-64">
+                    <td className="border border-gray-600 p-3 text-gray-200 font-medium text-center" style={{width: '200px'}}>{weapon.name}</td>
+                    <td className="border border-gray-600 p-3" style={{width: '250px'}}>
                       {renderAttunement(weapon.attunement)}
                     </td>
-                    <td className="border border-gray-600 p-3 text-gray-300 w-32">
+                    <td className="border border-gray-600 p-3 text-gray-300 text-center" style={{width: '80px'}}>
+                      {weapon.smite || '-'}
+                    </td>
+                    <td className="border border-gray-600 p-3 text-gray-300 text-center" style={{width: '120px'}}>
                       {weapon.virtueCap || '-'}
                     </td>
-                    <td className="border border-gray-600 p-3 text-center w-10">
+                    <td className="border border-gray-600 p-3 text-center" style={{width: '100px'}}>
                       <button
                         onClick={() => toggleOwned(weapon.name)}
                         className={`w-8 h-8 rounded flex items-center justify-center transition-colors mx-auto ${
@@ -232,14 +377,14 @@
                         {weaponData[weapon.name]?.owned && <Check size={20} className="text-white" />}
                       </button>
                     </td>
-                    <td className="border border-gray-600 p-3 w-20">
+                    <td className="border border-gray-600 p-3" style={{width: '100px'}}>
                       <input
                         type="number"
                         min="0"
                         max="30"
                         value={weaponData[weapon.name]?.level || ''}
                         onChange={(e) => updateLevel(weapon.name, e.target.value)}
-                        className="w-14 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-200 focus:outline-none focus:border-amber-500"
+                        className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-200 text-center focus:outline-none focus:border-amber-500"
                         placeholder="0"
                       />
                     </td>
@@ -252,12 +397,33 @@
       );
 
       return (
-        <div className="min-h-screen bg-gray-900 p-6">
-          <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gray-900 p-6 flex flex-col">
+          <div className="max-w-7xl mx-auto flex-grow w-full">
             <h1 className="text-4xl font-bold text-amber-400 mb-8 text-center border-b-4 border-amber-600 pb-4">
-              Weapon Tracker
+              Soulframe Weapon Tracker
             </h1>
             
+            {/* Import/Export Controls */}
+            <div className="mb-8 flex gap-4 justify-center flex-wrap">
+              <button
+                onClick={exportData}
+                className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-lg"
+              >
+                <Download size={20} />
+                Export Progress
+              </button>
+              <label className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-lg cursor-pointer">
+                <Upload size={20} />
+                Import Progress
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importData}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
             <div className="mb-12">
               <h2 className="text-3xl font-bold text-amber-300 mb-6">WEAPONS</h2>
               {Object.entries(groupedWeapons.WEAPONS || {}).map(([category, categoryWeapons]) =>
@@ -272,6 +438,40 @@
               )}
             </div>
           </div>
+
+          {/* Footer */}
+          <footer className="mt-12 pt-8 border-t border-gray-700">
+            <div className="max-w-7xl mx-auto text-center">
+              <p className="text-gray-400 mb-3">
+                Soulframe Weapon Tracker - Track your weapon collection and progress
+              </p>
+              <div className="flex justify-center items-center gap-6 text-gray-500 text-sm">
+                <a 
+                  href="https://github.com/driftywinds/soulframe-tracker" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-amber-400 transition-colors"
+                >
+                  <Github size={18} />
+                  GitHub Repository
+                </a>
+                <span>•</span>
+                <span>Data stored locally in your browser</span>
+                <span>•</span>
+                <a 
+                  href="https://wiki..avakot.org/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-amber-400 transition-colors"
+                >
+                  Soulframe Wiki
+                </a>
+              </div>
+              <p className="text-gray-600 text-xs mt-3">
+                Images and game content © Digital Extremes. This is an unofficial fan-made tracker.
+              </p>
+            </div>
+          </footer>
         </div>
       );
     };
@@ -281,6 +481,3 @@
   </script>
 </body>
 </html>
-
-
-

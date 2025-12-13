@@ -11,7 +11,7 @@ This is an unofficial, community-driven web application to track your weapon pro
 
 ---
 
-### A. Secure Deployment Prerequisites
+### A. Deployment Prerequisites
 
 To deploy this and enable the Google Drive synchronization feature, you must have the following:
 

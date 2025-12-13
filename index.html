@@ -8,114 +8,49 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@300;400;500;600;700&family=Metamorphous&display=swap" rel="stylesheet">
+  
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google API Client Library -->
-  <script src="https://apis.google.com/js/api.js"></script>
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+
   <style>
-    .grenze-font {
-      font-family: 'Grenze Gotisch', serif;
-    }
-    .metamorphous-font {
-      font-family: 'Metamorphous', serif;
-    }
-    input, button, th, td {
-      font-family: 'Grenze Gotisch', serif;
-    }
-    /* Base font sizes */
-    html {
-      font-size: 16px;
-    }
+    .grenze-font { font-family: 'Grenze Gotisch', serif; }
+    .metamorphous-font { font-family: 'Metamorphous', serif; }
+    input, button, th, td { font-family: 'Grenze Gotisch', serif; }
     
-    @media (min-width: 768px) {
-      html {
-        font-size: 18px;
-      }
-    }
+    /* Base font sizes */
+    html { font-size: 16px; }
+    @media (min-width: 768px) { html { font-size: 18px; } }
     
     /* Responsive font size classes */
-    .text-table-header {
-      font-size: 0.9rem;
-    }
+    .text-table-header { font-size: 0.9rem; }
+    @media (min-width: 768px) { .text-table-header { font-size: 1.2rem; } }
     
-    @media (min-width: 768px) {
-      .text-table-header {
-        font-size: 1.2rem;
-      }
-    }
+    .text-table-cell { font-size: 0.9rem; }
+    @media (min-width: 768px) { .text-table-cell { font-size: 1.1rem; } }
     
-    .text-table-cell {
-      font-size: 0.9rem;
-    }
+    .text-category-title { font-size: 1.2rem; }
+    @media (min-width: 768px) { .text-category-title { font-size: 1.8rem; } }
     
-    @media (min-width: 768px) {
-      .text-table-cell {
-        font-size: 1.1rem;
-      }
-    }
+    .text-section-title { font-size: 1.5rem; }
+    @media (min-width: 768px) { .text-section-title { font-size: 2.2rem; } }
     
-    .text-category-title {
-      font-size: 1.2rem;
-    }
+    .text-main-title { font-size: 2rem; }
+    @media (min-width: 768px) { .text-main-title { font-size: 3.5rem; } }
     
-    @media (min-width: 768px) {
-      .text-category-title {
-        font-size: 1.8rem;
-      }
-    }
+    .text-search { font-size: 1rem; }
+    @media (min-width: 768px) { .text-search { font-size: 1.3rem; } }
     
-    .text-section-title {
-      font-size: 1.5rem;
-    }
+    .text-button { font-size: 1rem; }
+    @media (min-width: 768px) { .text-button { font-size: 1.2rem; } }
     
-    @media (min-width: 768px) {
-      .text-section-title {
-        font-size: 2.2rem;
-      }
-    }
-    
-    .text-main-title {
-      font-size: 2rem;
-    }
-    
-    @media (min-width: 768px) {
-      .text-main-title {
-        font-size: 3.5rem;
-      }
-    }
-    
-    .text-search {
-      font-size: 1rem;
-    }
-    
-    @media (min-width: 768px) {
-      .text-search {
-        font-size: 1.3rem;
-      }
-    }
-    
-    .text-button {
-      font-size: 1rem;
-    }
-    
-    @media (min-width: 768px) {
-      .text-button {
-        font-size: 1.2rem;
-      }
-    }
-    
-    .text-footer {
-      font-size: 0.9rem;
-    }
-    
-    @media (min-width: 768px) {
-      .text-footer {
-        font-size: 1.1rem;
-      }
-    }
+    .text-footer { font-size: 0.9rem; }
+    @media (min-width: 768px) { .text-footer { font-size: 1.1rem; } }
     
     /* Mobile table improvements */
     .mobile-table-container {
@@ -126,7 +61,6 @@
       padding-left: 1rem;
       padding-right: 1rem;
     }
-    
     @media (min-width: 768px) {
       .mobile-table-container {
         margin-left: 0;
@@ -136,54 +70,14 @@
       }
     }
     
-    /* Adjust table column widths for mobile */
-    .table-responsive {
-      min-width: 800px;
-    }
-    
+    .table-responsive { min-width: 800px; }
     @media (min-width: 768px) {
-      .table-responsive {
-        min-width: auto;
-        width: 100%;
-      }
+      .table-responsive { min-width: auto; width: 100%; }
     }
     
-    /* Mobile spacing adjustments */
-    .mobile-padding {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-    
+    .mobile-padding { padding-left: 1rem; padding-right: 1rem; }
     @media (min-width: 768px) {
-      .mobile-padding {
-        padding-left: 0;
-        padding-right: 0;
-      }
-    }
-    
-    /* Google Sign-in button styling */
-    .gsi-material-button {
-      background-color: #3c7c3c;
-      border: none;
-      border-radius: 0.5rem;
-      color: #fff;
-      cursor: pointer;
-      font-family: 'Grenze Gotisch', serif;
-      font-size: 1rem;
-      height: 40px;
-      padding: 0 20px;
-      transition: background-color 0.3s;
-    }
-    
-    .gsi-material-button:hover {
-      background-color: #2e612e;
-    }
-    
-    @media (min-width: 768px) {
-      .gsi-material-button {
-        font-size: 1.2rem;
-        height: 48px;
-      }
+      .mobile-padding { padding-left: 0; padding-right: 0; }
     }
   </style>
 </head>
@@ -191,314 +85,53 @@
   <div id="root"></div>
   
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
-    // Lucide React icons
+    // --- GOOGLE DRIVE CONFIGURATION PLACEHOLDERS ---
+    const CLIENT_ID = '1073437837956-281q7jfqo1b8sv8au24jq7o2ftktc7o7.apps.googleusercontent.com';
+    const API_KEY = 'AIzaSyA8hENrSxGvEuLFD2hQ5jQ6FTFpDiq5g2w';
+    const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
+    const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+    const DATA_FILE_NAME = 'soulframe_tracker_data.json';
+    // -----------------------------------------------
+
+    // Icons
     const Check = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>
     );
-
     const Download = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
     );
-
     const Upload = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="17 8 12 3 7 8"></polyline>
-        <line x1="12" y1="3" x2="12" y2="15"></line>
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
     );
-
     const Github = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
-        <path d="M9 18c-4.51 2-5-2-7-2"></path>
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
     );
-
     const SearchIcon = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     );
-
+    // New Icons for Drive
+    const GoogleDriveIcon = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 2l9 17h-9L3 2h9zM22 22H2l3.5-6h13L22 22zM8.5 22L12 16l3.5 6h-7z" stroke="currentColor" /></svg> // Simplified Triangle representation
+    );
     const CloudUpload = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-        <path d="M12 12v9"></path>
-        <path d="m16 16-4-4-4 4"></path>
-      </svg>
+       <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 12v9"></path><path d="m16 16-4-4-4 4"></path><path d="M20 12h0c0-2.21-1.79-4-4-4h0c0-3.31-2.69-6-6-6h0c-3.31 0-6 2.69-6 6h0c-2.21 0-4 1.79-4 4h0"></path></svg>
     );
-
     const CloudDownload = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-        <path d="M12 12v9"></path>
-        <path d="m16 16-4 4-4-4"></path>
-      </svg>
-    );
-
-    const LogOut = ({ size = 24, className = "" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-        <polyline points="16 17 21 12 16 7"></polyline>
-        <line x1="21" y1="12" x2="9" y2="12"></line>
-      </svg>
+       <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 13v8"></path><path d="m8 17 4 4 4-4"></path><path d="M20 12h0c0-2.21-1.79-4-4-4h0c0-3.31-2.69-6-6-6h0c-3.31 0-6 2.69-6 6h0c-2.21 0-4 1.79-4 4h0"></path></svg>
     );
 
     const WeaponTracker = () => {
       const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
       const [searchTerm, setSearchTerm] = useState('');
-      const [isGoogleApiLoaded, setIsGoogleApiLoaded] = useState(false);
-      const [isSignedIn, setIsSignedIn] = useState(false);
-      const [isGoogleDriveLoading, setIsGoogleDriveLoading] = useState(false);
-      const [googleUser, setGoogleUser] = useState(null);
-
-      // Google API Configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
-      const GOOGLE_CLIENT_ID = '1073437837956-281q7jfqo1b8sv8au24jq7o2ftktc7o7.apps.googleusercontent.com';
-      const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
-      const DRIVE_FILE_NAME = 'soulframe_weapon_tracker_data.json';
-
-      // Initialize Google API
-      useEffect(() => {
-        const loadGoogleApi = () => {
-          if (window.gapi) {
-            window.gapi.load('client', initGoogleClient);
-          } else {
-            setTimeout(loadGoogleApi, 100);
-          }
-        };
-        
-        loadGoogleApi();
-      }, []);
-
-      const initGoogleClient = async () => {
-        try {
-          await window.gapi.client.init({
-            apiKey: GOOGLE_API_KEY,
-            clientId: GOOGLE_CLIENT_ID,
-            scope: GOOGLE_SCOPES,
-            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-          });
-          
-          setIsGoogleApiLoaded(true);
-          
-          // Check if user is already signed in
-          const authInstance = window.google.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
-            scope: GOOGLE_SCOPES,
-            callback: (tokenResponse) => {
-              if (tokenResponse && tokenResponse.access_token) {
-                setIsSignedIn(true);
-                loadUserProfile();
-              }
-            },
-          });
-          
-          // Try to get token silently
-          const tokenClient = window.google.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
-            scope: GOOGLE_SCOPES,
-            prompt: '',
-            callback: (tokenResponse) => {
-              if (tokenResponse && tokenResponse.access_token) {
-                setIsSignedIn(true);
-                loadUserProfile();
-              }
-            },
-          });
-          
-          tokenClient.requestAccessToken();
-        } catch (error) {
-          console.error('Error initializing Google client:', error);
-        }
-      };
-
-      const loadUserProfile = async () => {
-        try {
-          const response = await window.gapi.client.people.people.get({
-            resourceName: 'people/me',
-            personFields: 'names,emailAddresses,photos',
-          });
-          
-          setGoogleUser({
-            name: response.result.names?.[0]?.displayName || 'User',
-            email: response.result.emailAddresses?.[0]?.value || '',
-            photo: response.result.photos?.[0]?.url || '',
-          });
-        } catch (error) {
-          console.error('Error loading user profile:', error);
-        }
-      };
-
-      const handleGoogleSignIn = () => {
-        if (!isGoogleApiLoaded) {
-          alert('Google API is still loading. Please try again.');
-          return;
-        }
-
-        const tokenClient = window.google.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID,
-          scope: GOOGLE_SCOPES,
-          callback: async (tokenResponse) => {
-            if (tokenResponse && tokenResponse.access_token) {
-              setIsSignedIn(true);
-              await loadUserProfile();
-            }
-          },
-        });
-
-        tokenClient.requestAccessToken();
-      };
-
-      const handleGoogleSignOut = () => {
-        const token = window.gapi.client.getToken();
-        if (token) {
-          window.google.accounts.oauth2.revoke(token.access_token, () => {
-            window.gapi.client.setToken(null);
-            setIsSignedIn(false);
-            setGoogleUser(null);
-          });
-        }
-      };
-
-      // Backup to Google Drive
-      const backupToGoogleDrive = async () => {
-        if (!isGoogleApiLoaded) {
-          alert('Google API is not loaded. Please try again.');
-          return;
-        }
-
-        if (!isSignedIn) {
-          alert('Please sign in with Google first.');
-          return;
-        }
-
-        setIsGoogleDriveLoading(true);
-        try {
-          const dataStr = JSON.stringify(weaponData, null, 2);
-          
-          // Check if file already exists
-          let fileId = null;
-          try {
-            const response = await window.gapi.client.drive.files.list({
-              spaces: 'appData',
-              fields: 'files(id, name)',
-              q: `name='${DRIVE_FILE_NAME}' and trashed=false`
-            });
-            
-            if (response.result.files && response.result.files.length > 0) {
-              fileId = response.result.files[0].id;
-            }
-          } catch (error) {
-            console.error('Error checking for existing file:', error);
-          }
-
-          // Create file metadata
-          const fileMetadata = {
-            name: DRIVE_FILE_NAME,
-            parents: ['appDataFolder']
-          };
-
-          // Convert data to Blob
-          const blob = new Blob([dataStr], { type: 'application/json' });
-          const form = new FormData();
-          form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
-          form.append('file', blob);
-
-          let uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files';
-          let method = 'POST';
-          
-          if (fileId) {
-            uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}`;
-            method = 'PATCH';
-          }
-
-          const accessToken = window.gapi.client.getToken().access_token;
-          
-          const uploadResponse = await fetch(`${uploadUrl}?uploadType=multipart`, {
-            method: method,
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            },
-            body: form
-          });
-
-          if (uploadResponse.ok) {
-            alert('Data successfully backed up to Google Drive!');
-          } else {
-            throw new Error('Upload failed');
-          }
-        } catch (error) {
-          console.error('Error backing up to Google Drive:', error);
-          alert('Failed to backup to Google Drive. Please try again.');
-        } finally {
-          setIsGoogleDriveLoading(false);
-        }
-      };
-
-      // Load from Google Drive
-      const loadFromGoogleDrive = async () => {
-        if (!isGoogleApiLoaded) {
-          alert('Google API is not loaded. Please try again.');
-          return;
-        }
-
-        if (!isSignedIn) {
-          alert('Please sign in with Google first.');
-          return;
-        }
-
-        setIsGoogleDriveLoading(true);
-        try {
-          // Find the file
-          const response = await window.gapi.client.drive.files.list({
-            spaces: 'appData',
-            fields: 'files(id, name)',
-            q: `name='${DRIVE_FILE_NAME}' and trashed=false`
-          });
-
-          if (!response.result.files || response.result.files.length === 0) {
-            alert('No backup found in Google Drive.');
-            setIsGoogleDriveLoading(false);
-            return;
-          }
-
-          const fileId = response.result.files[0].id;
-          const accessToken = window.gapi.client.getToken().access_token;
-
-          // Download the file
-          const downloadResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          });
-
-          if (downloadResponse.ok) {
-            const data = await downloadResponse.json();
-            setWeaponData(data);
-            alert('Data successfully loaded from Google Drive!');
-          } else {
-            throw new Error('Download failed');
-          }
-        } catch (error) {
-          console.error('Error loading from Google Drive:', error);
-          alert('Failed to load from Google Drive. Please try again.');
-        } finally {
-          setIsGoogleDriveLoading(false);
-        }
-      };
-
-      // Rest of your existing code (attunementIcons, getImagePath, renderAttunement, handleSort, sortWeapons, weapons array, etc.)
-      // ... [All your existing code for attunementIcons, getImagePath, weapons array, etc.] ...
+      
+      // Google Drive State
+      const [isGapiLoaded, setIsGapiLoaded] = useState(false);
+      const [isGisLoaded, setIsGisLoaded] = useState(false);
+      const [isDriveConnected, setIsDriveConnected] = useState(false);
+      const tokenClient = useRef(null);
+      const [driveStatus, setDriveStatus] = useState(''); // For feedback messages
 
       // Attunement icon mapping
       const attunementIcons = {
@@ -507,7 +140,6 @@
         'Grace': 'https://static.wikitide.net/soulframewiki/thumb/f/ff/GracePip.png/100px-GracePip.png'
       };
 
-      // Function to get image path from assets folder
       const getImagePath = (category, weaponName, isSidearm) => {
         const categoryMap = {
           'BOW': 'bow',
@@ -519,30 +151,176 @@
           'SHORT BLADE': isSidearm ? 'shortblade_s' : 'shortblade',
           'FLYBLADE': 'flyblade'
         };
-        
         const folder = categoryMap[category] || category.toLowerCase().replace(' ', '');
-        // Replace special characters and spaces in weapon name
         const fileName = weaponName.replace(/[']/g, '').replace(/\s+/g, '');
         return `assets/weapons/${folder}/${fileName}.png`;
       };
 
-      // Function to render attunement with icons
+      // --- GOOGLE DRIVE INTEGRATION LOGIC ---
+
+      useEffect(() => {
+        // Load GAPI
+        const gapiScript = document.createElement("script");
+        gapiScript.src = "https://apis.google.com/js/api.js";
+        gapiScript.async = true;
+        gapiScript.defer = true;
+        gapiScript.onload = () => {
+          gapi.load("client", async () => {
+            await gapi.client.init({
+              apiKey: API_KEY,
+              discoveryDocs: DISCOVERY_DOCS,
+            });
+            setIsGapiLoaded(true);
+            
+            // Check if we have a valid token stored (optional advanced step, simplified here to session)
+            // For this implementation, we will ask user to connect every page load for security/simplicity
+            // or rely on cached session if available in gapi.
+          });
+        };
+        document.body.appendChild(gapiScript);
+
+        // Load GIS
+        const gisScript = document.createElement("script");
+        gisScript.src = "https://accounts.google.com/gsi/client";
+        gisScript.async = true;
+        gisScript.defer = true;
+        gisScript.onload = () => {
+           setIsGisLoaded(true);
+        };
+        document.body.appendChild(gisScript);
+      }, []);
+
+      useEffect(() => {
+        if (isGisLoaded) {
+          tokenClient.current = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: (response) => {
+              if (response.error !== undefined) {
+                console.error(response);
+                setDriveStatus('Error connecting to Drive.');
+                return;
+              }
+              setIsDriveConnected(true);
+              setDriveStatus('Connected to Google Drive (App Data).');
+              // Automatically hide success message after 3s
+              setTimeout(() => setDriveStatus(''), 3000);
+            },
+          });
+        }
+      }, [isGisLoaded]);
+
+      const handleAuthClick = () => {
+        if (!tokenClient.current) return;
+        if (gapi.client.getToken() === null) {
+          tokenClient.current.requestAccessToken({prompt: 'consent'});
+        } else {
+          tokenClient.current.requestAccessToken({prompt: ''});
+        }
+      };
+
+      const handleSignoutClick = () => {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken('');
+          setIsDriveConnected(false);
+          setDriveStatus('Disconnected from Drive.');
+        }
+      };
+
+      const saveToDrive = async () => {
+        setDriveStatus('Saving...');
+        try {
+          // 1. Check if file exists in AppDataFolder
+          const response = await gapi.client.drive.files.list({
+            q: `name = '${DATA_FILE_NAME}' and 'appDataFolder' in parents and trashed = false`,
+            fields: 'files(id, name)',
+            spaces: 'appDataFolder'
+          });
+
+          const fileContent = JSON.stringify(weaponData);
+          const file = new Blob([fileContent], {type: 'application/json'});
+          const metadata = {
+            name: DATA_FILE_NAME,
+            mimeType: 'application/json',
+            parents: ['appDataFolder']
+          };
+
+          const accessToken = gapi.auth.getToken().access_token;
+          const form = new FormData();
+          form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+          form.append('file', file);
+
+          if (response.result.files && response.result.files.length > 0) {
+            // Update existing file
+            const fileId = response.result.files[0].id;
+            
+            // Note: gapi.client.drive.files.update using 'uploadType=multipart' via REST is cleaner for raw content
+            const updateUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
+            
+            await fetch(updateUrl, {
+              method: 'PATCH',
+              headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+              body: form
+            });
+            setDriveStatus('Progress saved to Drive!');
+          } else {
+            // Create new file
+            const createUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+            await fetch(createUrl, {
+              method: 'POST',
+              headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+              body: form
+            });
+            setDriveStatus('Backup created on Drive!');
+          }
+        } catch (err) {
+          console.error(err);
+          setDriveStatus('Error saving to Drive.');
+        }
+        setTimeout(() => setDriveStatus(''), 3000);
+      };
+
+      const loadFromDrive = async () => {
+        setDriveStatus('Loading...');
+        try {
+          const response = await gapi.client.drive.files.list({
+            q: `name = '${DATA_FILE_NAME}' and 'appDataFolder' in parents and trashed = false`,
+            fields: 'files(id, name)',
+            spaces: 'appDataFolder'
+          });
+
+          if (response.result.files && response.result.files.length > 0) {
+            const fileId = response.result.files[0].id;
+            const fileResponse = await gapi.client.drive.files.get({
+              fileId: fileId,
+              alt: 'media'
+            });
+            
+            setWeaponData(fileResponse.result);
+            setDriveStatus('Progress loaded from Drive!');
+          } else {
+            setDriveStatus('No backup found on Drive.');
+          }
+        } catch (err) {
+          console.error(err);
+          setDriveStatus('Error loading from Drive.');
+        }
+        setTimeout(() => setDriveStatus(''), 3000);
+      };
+
+      // -------------------------------------
+
       const renderAttunement = (attunementString) => {
         if (!attunementString) return '-';
-        
         const attunements = attunementString.split(',').map(a => a.trim());
-        
         return (
           <div className="flex items-center justify-center gap-1 flex-wrap">
             {attunements.map((attunement, index) => (
               <div key={index} className="flex items-center gap-1">
                 {attunementIcons[attunement] && (
-                  <img 
-                    src={attunementIcons[attunement]} 
-                    alt={attunement}
-                    className="w-6 h-6 md:w-7 md:h-7 inline-block"
-                    title={attunement}
-                  />
+                  <img src={attunementIcons[attunement]} alt={attunement} className="w-6 h-6 md:w-7 md:h-7 inline-block" title={attunement} />
                 )}
                 <span className="text-sm md:text-base text-gray-300 grenze-font">{attunement}</span>
               </div>
@@ -551,7 +329,6 @@
         );
       };
 
-      // Sorting function
       const handleSort = (key, category) => {
         let direction = 'asc';
         if (sortConfig.key === `${category}-${key}` && sortConfig.direction === 'asc') {
@@ -564,11 +341,9 @@
         if (!sortConfig.key || !sortConfig.key.startsWith(`${category}-`)) {
           return categoryWeapons;
         }
-
         const key = sortConfig.key.replace(`${category}-`, '');
         const sorted = [...categoryWeapons].sort((a, b) => {
           let aValue, bValue;
-
           if (key === 'smite') {
             aValue = parseInt(a.smite) || 0;
             bValue = parseInt(b.smite) || 0;
@@ -579,34 +354,23 @@
             aValue = parseInt(weaponData[a.name]?.level) || 0;
             bValue = parseInt(weaponData[b.name]?.level) || 0;
           } else if (key === 'tier') {
-            // Extract numeric part from tier (e.g., "Tier 1" -> 1)
             aValue = parseInt(a.tier?.replace('Tier ', '')) || 0;
             bValue = parseInt(b.tier?.replace('Tier ', '')) || 0;
           }
-
-          if (sortConfig.direction === 'asc') {
-            return aValue - bValue;
-          } else {
-            return bValue - aValue;
-          }
+          if (sortConfig.direction === 'asc') return aValue - bValue;
+          return bValue - aValue;
         });
-
         return sorted;
       };
 
       const weapons = [
-        // BOW
         { category: 'BOW', name: 'Blitzel', attunement: 'Courage', tier: 'Tier 2', smite: '2', virtueCap: '28' },
         { category: 'BOW', name: 'Juniper', attunement: 'Grace', tier: 'Tier 2', smite: '6', virtueCap: '29' },
         { category: 'BOW', name: 'The Starling', attunement: 'Grace', tier: 'Tier 2', smite: '4', virtueCap: '30' },
         { category: 'BOW', name: 'Thistle', attunement: 'Grace', tier: 'Tier 1', smite: '5', virtueCap: '36' },
-        
-        // GREATSWORD
         { category: 'GREATSWORD', name: 'Needleseye', attunement: 'Courage', tier: 'Tier 2', smite: '5', virtueCap: '43' },
         { category: 'GREATSWORD', name: 'Purity', attunement: 'Courage', tier: 'Tier 3', smite: '6', virtueCap: '36' },
         { category: 'GREATSWORD', name: 'The Paragon', attunement: 'Courage, Spirit, Grace', tier: 'Tier 3', smite: '7', virtueCap: '114+' },
-        
-        // LONG BLADE
         { category: 'LONG BLADE', name: 'Dewelion', attunement: 'Grace', tier: 'Tier 3', smite: '6', virtueCap: '22' },
         { category: 'LONG BLADE', name: 'Igne Mora', attunement: 'Courage', tier: 'Tier 2', smite: '1', virtueCap: '29' },
         { category: 'LONG BLADE', name: "Marrow's Bane", attunement: 'Courage', tier: 'Tier 3', smite: '5', virtueCap: '27' },
@@ -617,37 +381,23 @@
         { category: 'LONG BLADE', name: 'The Ivor', attunement: 'Courage', tier: 'Tier 2', smite: '4', virtueCap: '29' },
         { category: 'LONG BLADE', name: 'Vetch', attunement: 'Courage', tier: 'Tier 2', smite: '3', virtueCap: '28' },
         { category: 'LONG BLADE', name: 'Wulder', attunement: 'Courage', tier: 'Tier 1', smite: '3', virtueCap: '36' },
-        
-        // MAGICK
         { category: 'MAGICK', name: 'Gwylen', attunement: 'Spirit', tier: 'Tier 1', smite: '6', virtueCap: '32' },
         { category: 'MAGICK', name: 'The Alder', attunement: 'Spirit', tier: 'Tier 2', smite: '6', virtueCap: '27' },
         { category: 'MAGICK', name: 'The Erstroot', attunement: 'Spirit', tier: 'Tier 2', smite: '6', virtueCap: '27' },
-        
-        // POLEARM
         { category: 'POLEARM', name: 'Duhk Halic', attunement: 'Courage', tier: 'Tier 2', smite: '4', virtueCap: '39' },
         { category: 'POLEARM', name: 'Gathannan', attunement: 'Spirit', tier: 'Tier 3', smite: '4', virtueCap: '35' },
         { category: 'POLEARM', name: 'Rook', attunement: 'Spirit', tier: 'Tier 2', smite: '2', virtueCap: '40' },
         { category: 'POLEARM', name: 'Vasp-IV', attunement: 'Courage', tier: 'Tier 1', smite: '5', virtueCap: '58' },
-        
-        // SHIELD
         { category: 'SHIELD', name: 'Bog & Myrtle', attunement: 'Grace', tier: 'Tier 2', smite: '2', virtueCap: '26' },
         { category: 'SHIELD', name: 'Oryn-Umbr', attunement: 'Courage', tier: 'Tier 2', smite: '5', virtueCap: '25' },
-        
-        // SHORT BLADE
         { category: 'SHORT BLADE', name: 'Rivt-II', attunement: 'Grace', tier: 'Tier 1', smite: '4', virtueCap: '26' },
         { category: 'SHORT BLADE', name: 'The Royal Tines', attunement: 'Spirit', tier: 'Tier 2', smite: '6', virtueCap: '17' },
         { category: 'SHORT BLADE', name: 'Unsula', attunement: 'Spirit', tier: 'Tier 2', smite: '5', virtueCap: '17' },
-        
-        // FLYBLADE (Sidearms)
         { category: 'FLYBLADE', name: 'Precklies', attunement: 'Courage', tier: 'Tier 1', smite: '4', virtueCap: '25', isSidearm: true },
         { category: 'FLYBLADE', name: 'Skilter', attunement: 'Grace', tier: 'Tier 2', smite: '3', virtueCap: '19', isSidearm: true },
         { category: 'FLYBLADE', name: 'Thrice Spurns', attunement: 'Courage', tier: 'Tier 2', smite: '4', virtueCap: '21', isSidearm: true },
-        
-        // MAGICK (Sidearms)
         { category: 'MAGICK', name: 'Esthelle', attunement: 'Spirit', tier: 'Tier 2', smite: '9', virtueCap: '22', isSidearm: true },
         { category: 'MAGICK', name: 'Odiac', attunement: 'Spirit', tier: 'Tier 2', smite: '6', virtueCap: '21', isSidearm: true },
-        
-        // SHORT BLADE (Sidearms)
         { category: 'SHORT BLADE', name: 'Cobladh', attunement: 'Grace', tier: 'Tier 2', smite: '4', virtueCap: '26', isSidearm: true },
         { category: 'SHORT BLADE', name: 'Grinn', attunement: 'Courage', tier: 'Tier 2', smite: '6', virtueCap: '23', isSidearm: true },
         { category: 'SHORT BLADE', name: 'Nettle', attunement: 'Grace', tier: 'Tier 1', smite: '3', virtueCap: '32', isSidearm: true },
@@ -656,16 +406,9 @@
       ];
 
       const [weaponData, setWeaponData] = useState(() => {
-        const saved = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('weaponData='));
-        
+        const saved = document.cookie.split('; ').find(row => row.startsWith('weaponData='));
         if (saved) {
-          try {
-            return JSON.parse(decodeURIComponent(saved.split('=')[1]));
-          } catch (e) {
-            return {};
-          }
+          try { return JSON.parse(decodeURIComponent(saved.split('=')[1])); } catch (e) { return {}; }
         }
         return {};
       });
@@ -677,13 +420,7 @@
       }, [weaponData]);
 
       const toggleOwned = (weaponName) => {
-        setWeaponData(prev => ({
-          ...prev,
-          [weaponName]: {
-            ...prev[weaponName],
-            owned: !prev[weaponName]?.owned
-          }
-        }));
+        setWeaponData(prev => ({ ...prev, [weaponName]: { ...prev[weaponName], owned: !prev[weaponName]?.owned } }));
       };
 
       const updateLevel = (weaponName, level) => {
@@ -693,17 +430,9 @@
           if (numLevel > 30) validLevel = '30';
           if (numLevel < 0) validLevel = '0';
         }
-        
-        setWeaponData(prev => ({
-          ...prev,
-          [weaponName]: {
-            ...prev[weaponName],
-            level: validLevel
-          }
-        }));
+        setWeaponData(prev => ({ ...prev, [weaponName]: { ...prev[weaponName], level: validLevel } }));
       };
 
-      // Export function
       const exportData = () => {
         const dataStr = JSON.stringify(weaponData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -717,11 +446,9 @@
         URL.revokeObjectURL(url);
       };
 
-      // Import function
       const importData = (event) => {
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
@@ -736,7 +463,6 @@
         event.target.value = '';
       };
 
-      // Filter weapons based on search term
       const filteredWeapons = weapons.filter(weapon => 
         weapon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         weapon.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -762,54 +488,18 @@
                   <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '100px'}}>Image</th>
                   <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '150px'}}>Weapon Name</th>
                   <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '200px'}}>Attunement</th>
-                  <th 
-                    className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
-                    style={{width: '80px'}}
-                    onClick={() => handleSort('tier', category)}
-                  >
-                    <div className="flex items-center justify-center gap-1">
-                      Tier
-                      {sortConfig.key === `${category}-tier` && (
-                        <span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </div>
+                  <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" style={{width: '80px'}} onClick={() => handleSort('tier', category)}>
+                    <div className="flex items-center justify-center gap-1">Tier {sortConfig.key === `${category}-tier` && (<span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>)}</div>
                   </th>
-                  <th 
-                    className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
-                    style={{width: '70px'}}
-                    onClick={() => handleSort('smite', category)}
-                  >
-                    <div className="flex items-center justify-center gap-1">
-                      Smite %
-                      {sortConfig.key === `${category}-smite` && (
-                        <span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </div>
+                  <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" style={{width: '70px'}} onClick={() => handleSort('smite', category)}>
+                    <div className="flex items-center justify-center gap-1">Smite % {sortConfig.key === `${category}-smite` && (<span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>)}</div>
                   </th>
-                  <th 
-                    className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
-                    style={{width: '100px'}}
-                    onClick={() => handleSort('virtueCap', category)}
-                  >
-                    <div className="flex items-center justify-center gap-1">
-                      Virtue Cap
-                      {sortConfig.key === `${category}-virtueCap` && (
-                        <span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </div>
+                  <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" style={{width: '100px'}} onClick={() => handleSort('virtueCap', category)}>
+                    <div className="flex items-center justify-center gap-1">Virtue Cap {sortConfig.key === `${category}-virtueCap` && (<span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>)}</div>
                   </th>
                   <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 grenze-font text-table-header" style={{width: '80px'}}>Owned</th>
-                  <th 
-                    className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" 
-                    style={{width: '80px'}}
-                    onClick={() => handleSort('level', category)}
-                  >
-                    <div className="flex items-center justify-center gap-1">
-                      Level
-                      {sortConfig.key === `${category}-level` && (
-                        <span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </div>
+                  <th className="border border-gray-600 p-2 md:p-3 text-center text-amber-300 cursor-pointer hover:bg-gray-600 transition-colors select-none grenze-font text-table-header" style={{width: '80px'}} onClick={() => handleSort('level', category)}>
+                    <div className="flex items-center justify-center gap-1">Level {sortConfig.key === `${category}-level` && (<span className="text-xs md:text-base">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>)}</div>
                   </th>
                 </tr>
               </thead>
@@ -817,54 +507,21 @@
                 {sortWeapons(categoryWeapons, category).map((weapon) => (
                   <tr key={weapon.name} className="hover:bg-gray-700 transition-colors">
                     <td className="border border-gray-600 p-1 md:p-2" style={{width: '100px'}}>
-                      <img 
-                        src={getImagePath(weapon.category, weapon.name, weapon.isSidearm)} 
-                        alt={weapon.name} 
-                        className="w-14 h-14 md:w-20 md:h-20 object-contain rounded mx-auto"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                      <div className="w-14 h-14 md:w-20 md:h-20 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs md:text-base mx-auto" style={{display: 'none'}}>
-                        No Image
-                      </div>
+                      <img src={getImagePath(weapon.category, weapon.name, weapon.isSidearm)} alt={weapon.name} className="w-14 h-14 md:w-20 md:h-20 object-contain rounded mx-auto" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                      <div className="w-14 h-14 md:w-20 md:h-20 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs md:text-base mx-auto" style={{display: 'none'}}>No Image</div>
                     </td>
                     <td className="border border-gray-600 p-2 md:p-3 text-gray-200 font-medium text-center grenze-font text-table-cell" style={{width: '150px'}}>{weapon.name}</td>
-                    <td className="border border-gray-600 p-2 md:p-3" style={{width: '200px'}}>
-                      {renderAttunement(weapon.attunement)}
-                    </td>
-                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '80px'}}>
-                      {weapon.tier || '-'}
-                    </td>
-                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '70px'}}>
-                      {weapon.smite || '-'}
-                    </td>
-                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '100px'}}>
-                      {weapon.virtueCap || '-'}
-                    </td>
+                    <td className="border border-gray-600 p-2 md:p-3" style={{width: '200px'}}>{renderAttunement(weapon.attunement)}</td>
+                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '80px'}}>{weapon.tier || '-'}</td>
+                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '70px'}}>{weapon.smite || '-'}</td>
+                    <td className="border border-gray-600 p-2 md:p-3 text-gray-300 text-center grenze-font text-table-cell" style={{width: '100px'}}>{weapon.virtueCap || '-'}</td>
                     <td className="border border-gray-600 p-2 md:p-3 text-center" style={{width: '80px'}}>
-                      <button
-                        onClick={() => toggleOwned(weapon.name)}
-                        className={`w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center transition-colors mx-auto ${
-                          weaponData[weapon.name]?.owned
-                            ? 'bg-green-600 hover:bg-green-700'
-                            : 'bg-gray-600 hover:bg-gray-500'
-                        }`}
-                      >
+                      <button onClick={() => toggleOwned(weapon.name)} className={`w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center transition-colors mx-auto ${weaponData[weapon.name]?.owned ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-500'}`}>
                         {weaponData[weapon.name]?.owned && <Check size={20} className="text-white" />}
                       </button>
                     </td>
                     <td className="border border-gray-600 p-2 md:p-3" style={{width: '80px'}}>
-                      <input
-                        type="number"
-                        min="0"
-                        max="30"
-                        value={weaponData[weapon.name]?.level || ''}
-                        onChange={(e) => updateLevel(weapon.name, e.target.value)}
-                        className="w-full bg-gray-700 border border-gray-600 rounded px-1 md:px-2 py-1 md:py-2 text-gray-200 text-center focus:outline-none focus:border-amber-500 grenze-font text-table-cell"
-                        placeholder="0"
-                      />
+                      <input type="number" min="0" max="30" value={weaponData[weapon.name]?.level || ''} onChange={(e) => updateLevel(weapon.name, e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded px-1 md:px-2 py-1 md:py-2 text-gray-200 text-center focus:outline-none focus:border-amber-500 grenze-font text-table-cell" placeholder="0" />
                     </td>
                   </tr>
                 ))}
@@ -877,177 +534,74 @@
       return (
         <div className="min-h-screen bg-gray-900 p-4 md:p-6 flex flex-col">
           <div className="max-w-7xl mx-auto flex-grow w-full mobile-padding">
-            <h1 className="font-bold text-amber-400 mb-6 md:mb-8 text-center border-b-2 md:border-b-4 border-amber-600 pb-3 md:pb-4 metamorphous-font text-main-title">
-              Soulframe Weapon Tracker (P12)
-            </h1>
+            <h1 className="font-bold text-amber-400 mb-6 md:mb-8 text-center border-b-2 md:border-b-4 border-amber-600 pb-3 md:pb-4 metamorphous-font text-main-title">Soulframe Weapon Tracker (P12)</h1>
             
-            {/* Search Bar */}
             <div className="mb-6 md:mb-8 relative">
               <div className="relative max-w-2xl mx-auto">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search weapons..."
-                  className="w-full bg-gray-800 border-2 border-amber-600 rounded-lg px-4 py-2 md:py-3 pl-10 md:pl-12 text-gray-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 grenze-font text-search"
-                />
-                <div className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-amber-400">
-                  <SearchIcon size={20} className="md:w-6 md:h-6" />
-                </div>
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-3 md:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 text-lg"
-                  >
-                    ✕
-                  </button>
-                )}
+                <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search weapons..." className="w-full bg-gray-800 border-2 border-amber-600 rounded-lg px-4 py-2 md:py-3 pl-10 md:pl-12 text-gray-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 grenze-font text-search" />
+                <div className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-amber-400"><SearchIcon size={20} className="md:w-6 md:h-6" /></div>
+                {searchTerm && (<button onClick={() => setSearchTerm('')} className="absolute right-3 md:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 text-lg">✕</button>)}
               </div>
-              {searchTerm && (
-                <p className="text-gray-400 text-center mt-2 grenze-font text-sm md:text-base">
-                  Showing {filteredWeapons.length} weapon{filteredWeapons.length !== 1 ? 's' : ''} matching "{searchTerm}"
-                </p>
-              )}
-            </div>
-
-            {/* Google Drive Authentication */}
-            <div className="mb-6 md:mb-8 p-4 bg-gray-800 rounded-lg border border-gray-700">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                  <h3 className="text-amber-300 metamorphous-font text-lg md:text-xl mb-2">Google Drive Backup</h3>
-                  <p className="text-gray-400 grenze-font text-sm md:text-base">
-                    {isSignedIn ? 
-                      `Signed in as ${googleUser?.name || 'User'}` : 
-                      'Sign in to backup your progress to Google Drive'}
-                  </p>
-                </div>
-                
-                <div className="flex gap-3">
-                  {!isSignedIn ? (
-                    <button
-                      onClick={handleGoogleSignIn}
-                      disabled={!isGoogleApiLoaded || isGoogleDriveLoading}
-                      className={`flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button ${(!isGoogleApiLoaded || isGoogleDriveLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      {isGoogleDriveLoading ? (
-                        <span className="animate-spin">⟳</span>
-                      ) : (
-                        <>
-                          <CloudUpload size={20} className="md:w-6 md:h-6" />
-                          Sign in with Google
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        onClick={backupToGoogleDrive}
-                        disabled={isGoogleDriveLoading}
-                        className={`flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button ${isGoogleDriveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        {isGoogleDriveLoading ? (
-                          <span className="animate-spin">⟳</span>
-                        ) : (
-                          <>
-                            <CloudUpload size={20} className="md:w-6 md:h-6" />
-                            Backup to Drive
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={loadFromGoogleDrive}
-                        disabled={isGoogleDriveLoading}
-                        className={`flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button ${isGoogleDriveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        {isGoogleDriveLoading ? (
-                          <span className="animate-spin">⟳</span>
-                        ) : (
-                          <>
-                            <CloudDownload size={20} className="md:w-6 md:h-6" />
-                            Load from Drive
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={handleGoogleSignOut}
-                        className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button"
-                      >
-                        <LogOut size={20} className="md:w-6 md:h-6" />
-                        Sign Out
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
+              {searchTerm && (<p className="text-gray-400 text-center mt-2 grenze-font text-sm md:text-base">Showing {filteredWeapons.length} weapon{filteredWeapons.length !== 1 ? 's' : ''} matching "{searchTerm}"</p>)}
             </div>
 
             {/* Import/Export Controls */}
-            <div className="mb-6 md:mb-8 flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <button
-                onClick={exportData}
-                className="flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button"
-              >
-                <Download size={20} className="md:w-6 md:h-6" />
-                Export Progress
+            <div className="mb-4 flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+              <button onClick={exportData} className="flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button">
+                <Download size={20} className="md:w-6 md:h-6" /> Export Progress
               </button>
               <label className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg cursor-pointer grenze-font text-button">
-                <Upload size={20} className="md:w-6 md:h-6" />
-                Import Progress
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={importData}
-                  className="hidden"
-                />
+                <Upload size={20} className="md:w-6 md:h-6" /> Import Progress
+                <input type="file" accept=".json" onChange={importData} className="hidden" />
               </label>
+            </div>
+
+            {/* Google Drive Controls */}
+            <div className="mb-6 md:mb-8 flex flex-col items-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+                {!isDriveConnected ? (
+                  <button onClick={handleAuthClick} disabled={!isGapiLoaded || !isGisLoaded} className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button border border-gray-600 disabled:opacity-50">
+                    <GoogleDriveIcon size={20} className="md:w-6 md:h-6 text-green-400" /> Connect Google Drive
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={saveToDrive} className="flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button">
+                      <CloudUpload size={20} className="md:w-6 md:h-6" /> Save to Drive
+                    </button>
+                    <button onClick={loadFromDrive} className="flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button">
+                      <CloudDownload size={20} className="md:w-6 md:h-6" /> Load from Drive
+                    </button>
+                    <button onClick={handleSignoutClick} className="flex items-center justify-center gap-2 bg-red-900/50 hover:bg-red-900 text-red-200 font-medium px-3 py-2 rounded-lg transition-colors shadow-lg grenze-font text-sm border border-red-900">
+                      Disconnect
+                    </button>
+                  </>
+                )}
+              </div>
+              {driveStatus && (
+                <p className="text-amber-300 text-sm grenze-font animate-pulse">{driveStatus}</p>
+              )}
             </div>
 
             <div className="mb-8 md:mb-12">
               <h2 className="font-bold text-amber-300 mb-4 md:mb-6 metamorphous-font text-section-title">WEAPONS</h2>
-              {Object.entries(groupedWeapons.WEAPONS || {}).map(([category, categoryWeapons]) =>
-                renderWeaponTable(categoryWeapons, category)
-              )}
+              {Object.entries(groupedWeapons.WEAPONS || {}).map(([category, categoryWeapons]) => renderWeaponTable(categoryWeapons, category))}
             </div>
 
             <div>
               <h2 className="font-bold text-amber-300 mb-4 md:mb-6 metamorphous-font text-section-title">SIDEARMS</h2>
-              {Object.entries(groupedWeapons.SIDEARMS || {}).map(([category, categoryWeapons]) =>
-                renderWeaponTable(categoryWeapons, category)
-              )}
+              {Object.entries(groupedWeapons.SIDEARMS || {}).map(([category, categoryWeapons]) => renderWeaponTable(categoryWeapons, category))}
             </div>
           </div>
 
-          {/* Footer */}
           <footer className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-gray-700">
             <div className="max-w-7xl mx-auto text-center mobile-padding">
-              <p className="text-gray-400 mb-3 grenze-font text-footer">
-                Soulframe Weapon Tracker - Track your weapon collection and progress
-              </p>
+              <p className="text-gray-400 mb-3 grenze-font text-footer">Soulframe Weapon Tracker - Track your weapon collection and progress</p>
               <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-6 text-gray-500 grenze-font text-sm md:text-footer">
-                <a 
-                  href="https://github.com/driftywinds/soulframe-weapon-tracker" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-amber-400 transition-colors"
-                >
-                  <Github size={16} className="md:w-5 md:h-5" />
-                  GitHub Repository
-                </a>
-                <span className="hidden md:inline">•</span>
-                <span>Data stored locally in your browser</span>
-                <span className="hidden md:inline">•</span>
-                <a 
-                  href="https://wiki.avakot.org/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-amber-400 transition-colors"
-                >
-                  All data sourced from Avakot.org Soulframe Wiki
-                </a>
+                <a href="https://github.com/driftywinds/soulframe-weapon-tracker" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-amber-400 transition-colors"><Github size={16} className="md:w-5 md:h-5" /> GitHub Repository</a>
+                <span className="hidden md:inline">•</span><span>Data stored locally & via Google Drive</span><span className="hidden md:inline">•</span>
+                <a href="https://wiki.avakot.org/" target="_blank" rel="noopener noreferrer" className="hover:text-amber-400 transition-colors">All data sourced from Avakot.org Soulframe Wiki</a>
               </div>
-              <p className="text-gray-600 mt-3 grenze-font text-xs md:text-footer">
-                Images and game content © Digital Extremes. This is an unofficial fan-made tracker.
-              </p>
+              <p className="text-gray-600 mt-3 grenze-font text-xs md:text-footer">Images and game content © Digital Extremes. This is an unofficial fan-made tracker.</p>
             </div>
           </footer>
         </div>

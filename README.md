@@ -13,12 +13,13 @@ This is an unofficial, community-driven web application to track your weapon pro
 
 ### A. Secure Deployment Prerequisites
 
-To enable the Google Drive synchronization feature and secure your app, you must have the following:
+To deploy this and enable the Google Drive synchronization feature, you must have the following:
 
 1.  Google API Credentials
     * A Google API Key (`AIzaSy...`)
     * A Google OAuth 2.0 Client ID (`7346...apps.googleusercontent.com`)
-    * *Note: Ensure the Google Drive API is enabled for your project in the Google Cloud Console.*
+    * You can make these [from here](https://console.cloud.google.com/apis/credentials)
+    * Ensure the Google Drive API is enabled for your project in the Google Cloud Console.
 2.  Free Cloudflare account connected to your GitHub account
 
 ### B. How to deploy on Cloudflare Pages
@@ -27,7 +28,7 @@ To enable the Google Drive synchronization feature and secure your app, you must
 3. Choose nothing as the build preset or build command (basically dont change anything) EXCEPT
 4. provide ENV variables to Cloudflare -
 
-   a) `GOOGLE_CLIENT_ID` (make a new client in oauth consent screen in google cloud console) and
+   a) `GOOGLE_CLIENT_ID` 
 
-   b) `GOOGLE_API_KEY` [(from here)](https://console.cloud.google.com/apis/credentials)
+   b) `GOOGLE_API_KEY` 
 5. Deploy the project

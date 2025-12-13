@@ -12,6 +12,9 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google API Client Library -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     .grenze-font {
       font-family: 'Grenze Gotisch', serif;
@@ -157,6 +160,31 @@
         padding-right: 0;
       }
     }
+    
+    /* Google Sign-in button styling */
+    .gsi-material-button {
+      background-color: #3c7c3c;
+      border: none;
+      border-radius: 0.5rem;
+      color: #fff;
+      cursor: pointer;
+      font-family: 'Grenze Gotisch', serif;
+      font-size: 1rem;
+      height: 40px;
+      padding: 0 20px;
+      transition: background-color 0.3s;
+    }
+    
+    .gsi-material-button:hover {
+      background-color: #2e612e;
+    }
+    
+    @media (min-width: 768px) {
+      .gsi-material-button {
+        font-size: 1.2rem;
+        height: 48px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -202,9 +230,275 @@
       </svg>
     );
 
+    const CloudUpload = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+        <path d="M12 12v9"></path>
+        <path d="m16 16-4-4-4 4"></path>
+      </svg>
+    );
+
+    const CloudDownload = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+        <path d="M12 12v9"></path>
+        <path d="m16 16-4 4-4-4"></path>
+      </svg>
+    );
+
+    const LogOut = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+    );
+
     const WeaponTracker = () => {
       const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
       const [searchTerm, setSearchTerm] = useState('');
+      const [isGoogleApiLoaded, setIsGoogleApiLoaded] = useState(false);
+      const [isSignedIn, setIsSignedIn] = useState(false);
+      const [isGoogleDriveLoading, setIsGoogleDriveLoading] = useState(false);
+      const [googleUser, setGoogleUser] = useState(null);
+
+      // Google API Configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
+      const GOOGLE_CLIENT_ID = '1073437837956-281q7jfqo1b8sv8au24jq7o2ftktc7o7.apps.googleusercontent.com';
+      const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+      const DRIVE_FILE_NAME = 'soulframe_weapon_tracker_data.json';
+
+      // Initialize Google API
+      useEffect(() => {
+        const loadGoogleApi = () => {
+          if (window.gapi) {
+            window.gapi.load('client', initGoogleClient);
+          } else {
+            setTimeout(loadGoogleApi, 100);
+          }
+        };
+        
+        loadGoogleApi();
+      }, []);
+
+      const initGoogleClient = async () => {
+        try {
+          await window.gapi.client.init({
+            apiKey: GOOGLE_API_KEY,
+            clientId: GOOGLE_CLIENT_ID,
+            scope: GOOGLE_SCOPES,
+            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+          });
+          
+          setIsGoogleApiLoaded(true);
+          
+          // Check if user is already signed in
+          const authInstance = window.google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: GOOGLE_SCOPES,
+            callback: (tokenResponse) => {
+              if (tokenResponse && tokenResponse.access_token) {
+                setIsSignedIn(true);
+                loadUserProfile();
+              }
+            },
+          });
+          
+          // Try to get token silently
+          const tokenClient = window.google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: GOOGLE_SCOPES,
+            prompt: '',
+            callback: (tokenResponse) => {
+              if (tokenResponse && tokenResponse.access_token) {
+                setIsSignedIn(true);
+                loadUserProfile();
+              }
+            },
+          });
+          
+          tokenClient.requestAccessToken();
+        } catch (error) {
+          console.error('Error initializing Google client:', error);
+        }
+      };
+
+      const loadUserProfile = async () => {
+        try {
+          const response = await window.gapi.client.people.people.get({
+            resourceName: 'people/me',
+            personFields: 'names,emailAddresses,photos',
+          });
+          
+          setGoogleUser({
+            name: response.result.names?.[0]?.displayName || 'User',
+            email: response.result.emailAddresses?.[0]?.value || '',
+            photo: response.result.photos?.[0]?.url || '',
+          });
+        } catch (error) {
+          console.error('Error loading user profile:', error);
+        }
+      };
+
+      const handleGoogleSignIn = () => {
+        if (!isGoogleApiLoaded) {
+          alert('Google API is still loading. Please try again.');
+          return;
+        }
+
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: GOOGLE_SCOPES,
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              setIsSignedIn(true);
+              await loadUserProfile();
+            }
+          },
+        });
+
+        tokenClient.requestAccessToken();
+      };
+
+      const handleGoogleSignOut = () => {
+        const token = window.gapi.client.getToken();
+        if (token) {
+          window.google.accounts.oauth2.revoke(token.access_token, () => {
+            window.gapi.client.setToken(null);
+            setIsSignedIn(false);
+            setGoogleUser(null);
+          });
+        }
+      };
+
+      // Backup to Google Drive
+      const backupToGoogleDrive = async () => {
+        if (!isGoogleApiLoaded) {
+          alert('Google API is not loaded. Please try again.');
+          return;
+        }
+
+        if (!isSignedIn) {
+          alert('Please sign in with Google first.');
+          return;
+        }
+
+        setIsGoogleDriveLoading(true);
+        try {
+          const dataStr = JSON.stringify(weaponData, null, 2);
+          
+          // Check if file already exists
+          let fileId = null;
+          try {
+            const response = await window.gapi.client.drive.files.list({
+              spaces: 'appData',
+              fields: 'files(id, name)',
+              q: `name='${DRIVE_FILE_NAME}' and trashed=false`
+            });
+            
+            if (response.result.files && response.result.files.length > 0) {
+              fileId = response.result.files[0].id;
+            }
+          } catch (error) {
+            console.error('Error checking for existing file:', error);
+          }
+
+          // Create file metadata
+          const fileMetadata = {
+            name: DRIVE_FILE_NAME,
+            parents: ['appDataFolder']
+          };
+
+          // Convert data to Blob
+          const blob = new Blob([dataStr], { type: 'application/json' });
+          const form = new FormData();
+          form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
+          form.append('file', blob);
+
+          let uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files';
+          let method = 'POST';
+          
+          if (fileId) {
+            uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}`;
+            method = 'PATCH';
+          }
+
+          const accessToken = window.gapi.client.getToken().access_token;
+          
+          const uploadResponse = await fetch(`${uploadUrl}?uploadType=multipart`, {
+            method: method,
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: form
+          });
+
+          if (uploadResponse.ok) {
+            alert('Data successfully backed up to Google Drive!');
+          } else {
+            throw new Error('Upload failed');
+          }
+        } catch (error) {
+          console.error('Error backing up to Google Drive:', error);
+          alert('Failed to backup to Google Drive. Please try again.');
+        } finally {
+          setIsGoogleDriveLoading(false);
+        }
+      };
+
+      // Load from Google Drive
+      const loadFromGoogleDrive = async () => {
+        if (!isGoogleApiLoaded) {
+          alert('Google API is not loaded. Please try again.');
+          return;
+        }
+
+        if (!isSignedIn) {
+          alert('Please sign in with Google first.');
+          return;
+        }
+
+        setIsGoogleDriveLoading(true);
+        try {
+          // Find the file
+          const response = await window.gapi.client.drive.files.list({
+            spaces: 'appData',
+            fields: 'files(id, name)',
+            q: `name='${DRIVE_FILE_NAME}' and trashed=false`
+          });
+
+          if (!response.result.files || response.result.files.length === 0) {
+            alert('No backup found in Google Drive.');
+            setIsGoogleDriveLoading(false);
+            return;
+          }
+
+          const fileId = response.result.files[0].id;
+          const accessToken = window.gapi.client.getToken().access_token;
+
+          // Download the file
+          const downloadResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          });
+
+          if (downloadResponse.ok) {
+            const data = await downloadResponse.json();
+            setWeaponData(data);
+            alert('Data successfully loaded from Google Drive!');
+          } else {
+            throw new Error('Download failed');
+          }
+        } catch (error) {
+          console.error('Error loading from Google Drive:', error);
+          alert('Failed to load from Google Drive. Please try again.');
+        } finally {
+          setIsGoogleDriveLoading(false);
+        }
+      };
+
+      // Rest of your existing code (attunementIcons, getImagePath, renderAttunement, handleSort, sortWeapons, weapons array, etc.)
+      // ... [All your existing code for attunementIcons, getImagePath, weapons array, etc.] ...
 
       // Attunement icon mapping
       const attunementIcons = {
@@ -614,6 +908,77 @@
                   Showing {filteredWeapons.length} weapon{filteredWeapons.length !== 1 ? 's' : ''} matching "{searchTerm}"
                 </p>
               )}
+            </div>
+
+            {/* Google Drive Authentication */}
+            <div className="mb-6 md:mb-8 p-4 bg-gray-800 rounded-lg border border-gray-700">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                  <h3 className="text-amber-300 metamorphous-font text-lg md:text-xl mb-2">Google Drive Backup</h3>
+                  <p className="text-gray-400 grenze-font text-sm md:text-base">
+                    {isSignedIn ? 
+                      `Signed in as ${googleUser?.name || 'User'}` : 
+                      'Sign in to backup your progress to Google Drive'}
+                  </p>
+                </div>
+                
+                <div className="flex gap-3">
+                  {!isSignedIn ? (
+                    <button
+                      onClick={handleGoogleSignIn}
+                      disabled={!isGoogleApiLoaded || isGoogleDriveLoading}
+                      className={`flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button ${(!isGoogleApiLoaded || isGoogleDriveLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {isGoogleDriveLoading ? (
+                        <span className="animate-spin">⟳</span>
+                      ) : (
+                        <>
+                          <CloudUpload size={20} className="md:w-6 md:h-6" />
+                          Sign in with Google
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={backupToGoogleDrive}
+                        disabled={isGoogleDriveLoading}
+                        className={`flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button ${isGoogleDriveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {isGoogleDriveLoading ? (
+                          <span className="animate-spin">⟳</span>
+                        ) : (
+                          <>
+                            <CloudUpload size={20} className="md:w-6 md:h-6" />
+                            Backup to Drive
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={loadFromGoogleDrive}
+                        disabled={isGoogleDriveLoading}
+                        className={`flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button ${isGoogleDriveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {isGoogleDriveLoading ? (
+                          <span className="animate-spin">⟳</span>
+                        ) : (
+                          <>
+                            <CloudDownload size={20} className="md:w-6 md:h-6" />
+                            Load from Drive
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={handleGoogleSignOut}
+                        className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors shadow-lg grenze-font text-button"
+                      >
+                        <LogOut size={20} className="md:w-6 md:h-6" />
+                        Sign Out
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Import/Export Controls */}

@@ -85,7 +85,6 @@
     const { useState, useEffect, useRef } = React;
 
     // --- GOOGLE DRIVE CONFIGURATION ---
-    // These variables will be set by the fetch operation in the useEffect hook.
     let CLIENT_ID = null;
     let API_KEY = null; 
     
@@ -141,10 +140,8 @@
 
       // --- 1. KEY FETCHING LOGIC ---
       useEffect(() => {
-        // Fetch keys from the Cloudflare Pages Function endpoint
         async function fetchKeys() {
           try {
-            // The /keys endpoint maps to the functions/keys.js file
             const response = await fetch('/keys'); 
             const data = await response.json();
             
@@ -156,7 +153,6 @@
                 return;
             }
 
-            // Set the global variables
             CLIENT_ID = data.clientID;
             API_KEY = data.apiKey;
             setKeysLoaded(true);
@@ -165,7 +161,7 @@
 
           } catch (error) {
             console.error("Key Fetch Error:", error);
-            setDriveStatus('FATAL: Could not load configuration. Ensure "functions/keys.js" is deployed.');
+            setDriveStatus('FATAL: Could not load configuration.');
             setKeyError(true);
           }
         }
@@ -174,9 +170,8 @@
 
       // --- 2. DYNAMIC GOOGLE SCRIPT LOADING ---
       useEffect(() => {
-        if (!keysLoaded) return; // Wait for keys to load before loading Google scripts
+        if (!keysLoaded) return;
         
-        // Function to load external JS scripts dynamically
         const loadScript = (src, onloadCallback) => {
           const script = document.createElement("script");
           script.src = src;
@@ -186,7 +181,6 @@
           document.head.appendChild(script);
         };
 
-        // Load GAPI (Google Platform Library)
         loadScript("https://apis.google.com/js/api.js", () => {
           gapi.load("client", async () => {
             try {
@@ -196,13 +190,12 @@
                 });
                 setIsGapiLoaded(true);
             } catch(e) {
-                console.error("GAPI Initialization Failed (Check API Key restriction/origin):", e);
+                console.error("GAPI Initialization Failed:", e);
                 setDriveStatus("GAPI init failed. Check Console and API Key.");
             }
           });
         });
 
-        // Load GIS (Google Identity Services)
         loadScript("https://accounts.google.com/gsi/client", () => {
            setIsGisLoaded(true);
         });
@@ -211,14 +204,14 @@
 
       // --- 3. Token Client Initialization ---
       useEffect(() => {
-        if (isGisLoaded && CLIENT_ID) { // Ensure GIS is loaded and keys are available
+        if (isGisLoaded && CLIENT_ID) {
           tokenClient.current = google.accounts.oauth2.initTokenClient({
             client_id: CLIENT_ID,
             scope: SCOPES,
             callback: (response) => {
               if (response.error !== undefined) {
                 console.error(response);
-                setDriveStatus('Error connecting to Drive. Check console for details.');
+                setDriveStatus('Error connecting to Drive.');
                 return;
               }
               setIsDriveConnected(true);
@@ -230,15 +223,15 @@
       }, [isGisLoaded]);
 
 
-      // --- 4. GOOGLE DRIVE INTEGRATION LOGIC ---
+      // --- 4. GOOGLE DRIVE INTEGRATION LOGIC (UPDATED) ---
 
       const handleAuthClick = () => {
         if (keyError) {
-          alert('Cannot connect: API keys failed to load. Check Cloudflare configuration.');
+          alert('Cannot connect: API keys failed to load.');
           return;
         }
         if (!tokenClient.current) {
-            setDriveStatus('Google services are still loading. Please wait a moment.');
+            setDriveStatus('Google services are still loading. Please wait.');
             return;
         }
         setIsSettingsOpen(false); 
@@ -261,6 +254,7 @@
         setTimeout(() => setDriveStatus(''), 3000);
       };
 
+      // --- IMPROVED SAVE LOGIC ---
       const saveToDrive = async () => {
         if (!isDriveConnected) {
             setDriveStatus('Please connect to Google Drive first.');
@@ -269,36 +263,56 @@
         setDriveStatus('Saving...');
         setIsSettingsOpen(false); 
         try {
+          // 1. Search for existing files, sorted by newest first
           const response = await gapi.client.drive.files.list({
             q: `name = '${DATA_FILE_NAME}' and 'appDataFolder' in parents and trashed = false`,
-            fields: 'files(id, name)',
-            spaces: 'appDataFolder'
+            fields: 'files(id, name, modifiedTime)',
+            spaces: 'appDataFolder',
+            orderBy: 'modifiedTime desc' // Key fix: get latest file
           });
 
+          const files = response.result.files;
           const fileContent = JSON.stringify(weaponData);
-          const file = new Blob([fileContent], {type: 'application/json'});
-          const metadata = {
-            name: DATA_FILE_NAME,
-            mimeType: 'application/json',
-            parents: ['appDataFolder']
-          };
-
           const accessToken = gapi.auth.getToken().access_token;
-          const form = new FormData();
-          form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-          form.append('file', file);
 
-          if (response.result.files && response.result.files.length > 0) {
-            const fileId = response.result.files[0].id;
-            const updateUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
+          if (files && files.length > 0) {
+            // 2. File exists - Update the newest one using simple uploadType=media
+            const latestFile = files[0];
+            const fileId = latestFile.id;
+            
+            // This update method is cleaner for content-only updates
+            const updateUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`;
             
             await fetch(updateUrl, {
               method: 'PATCH',
-              headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
-              body: form
+              headers: new Headers({ 
+                'Authorization': 'Bearer ' + accessToken,
+                'Content-Type': 'application/json' 
+              }),
+              body: fileContent
             });
+
+            // 3. Cleanup: If duplicates exist, delete the older ones
+            if (files.length > 1) {
+                console.log("Cleaning up duplicate backup files...");
+                for (let i = 1; i < files.length; i++) {
+                    await gapi.client.drive.files.delete({ fileId: files[i].id });
+                }
+            }
+
             setDriveStatus('Progress saved to Drive!');
           } else {
+            // 4. File does not exist - Create new via Multipart
+            const metadata = {
+              name: DATA_FILE_NAME,
+              mimeType: 'application/json',
+              parents: ['appDataFolder']
+            };
+
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', new Blob([fileContent], { type: 'application/json' }));
+
             const createUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
             await fetch(createUrl, {
               method: 'POST',
@@ -308,12 +322,13 @@
             setDriveStatus('Backup created on Drive!');
           }
         } catch (err) {
-          console.error(err);
+          console.error("Drive Save Error:", err);
           setDriveStatus('Error saving to Drive. See console.');
         }
         setTimeout(() => setDriveStatus(''), 3000);
       };
 
+      // --- IMPROVED LOAD LOGIC ---
       const loadFromDrive = async () => {
         if (!isDriveConnected) {
             setDriveStatus('Please connect to Google Drive first.');
@@ -322,24 +337,26 @@
         setDriveStatus('Loading...');
         setIsSettingsOpen(false); 
         try {
+          // 1. Search for files, sorted by newest first
           const response = await gapi.client.drive.files.list({
             q: `name = '${DATA_FILE_NAME}' and 'appDataFolder' in parents and trashed = false`,
-            fields: 'files(id, name)',
-            spaces: 'appDataFolder'
+            fields: 'files(id, name, modifiedTime)',
+            spaces: 'appDataFolder',
+            orderBy: 'modifiedTime desc' // Key fix: get latest file
           });
 
           if (response.result.files && response.result.files.length > 0) {
+            // 2. Always grab the first one (newest)
             const fileId = response.result.files[0].id;
             const fileResponse = await gapi.client.drive.files.get({
               fileId: fileId,
               alt: 'media'
             });
             
-            // Note: fileResponse.result is the JSON object (the file content)
             setWeaponData(fileResponse.result); 
             setDriveStatus('Progress loaded from Drive!');
           } else {
-            setDriveStatus('No backup found on Drive. Use "Save Progress" to create one.');
+            setDriveStatus('No backup found on Drive.');
           }
         } catch (err) {
           console.error(err);
@@ -370,7 +387,6 @@
       };
 
       const getImagePath = (category, weaponName, isSidearm) => {
-        // ... (getImagePath function remains the same)
         const categoryMap = {
           'BOW': 'bow',
           'GREATSWORD': 'greatsword',
@@ -387,7 +403,6 @@
       };
 
       const renderAttunement = (attunementString) => {
-        // ... (renderAttunement function remains the same)
         if (!attunementString) return '-';
         const attunements = attunementString.split(',').map(a => a.trim());
         return (
@@ -405,7 +420,6 @@
       };
 
       const handleSort = (key, category) => {
-        // ... (handleSort function remains the same)
         let direction = 'asc';
         if (sortConfig.key === `${category}-${key}` && sortConfig.direction === 'asc') {
           direction = 'desc';
@@ -414,7 +428,6 @@
       };
 
       const sortWeapons = (categoryWeapons, category) => {
-        // ... (sortWeapons function remains the same)
         if (!sortConfig.key || !sortConfig.key.startsWith(`${category}-`)) {
           return categoryWeapons;
         }
@@ -441,12 +454,11 @@
       };
 
       const weapons = [
-        // ... (weapons array remains the same)
         { category: 'BOW', name: 'Blitzel', attunement: 'Courage', tier: 'Tier 2', smite: '2', virtueCap: '28' },
         { category: 'BOW', name: 'Juniper', attunement: 'Grace', tier: 'Tier 2', smite: '6', virtueCap: '29' },
         { category: 'BOW', name: 'The Starling', attunement: 'Grace', tier: 'Tier 2', smite: '4', virtueCap: '30' },
         { category: 'BOW', name: 'Thistle', attunement: 'Grace', tier: 'Tier 1', smite: '5', virtueCap: '36' },
-        { category: 'GREATSWORD', name: 'Needleseye', attunement: 'Grace', tier: 'Tier 2', smite: '5', virtueCap: '43' },
+        { category: 'GREATSWORD', name: 'Needleseye', attunement: 'Courage', tier: 'Tier 2', smite: '5', virtueCap: '43' },
         { category: 'GREATSWORD', name: 'Purity', attunement: 'Courage', tier: 'Tier 3', smite: '6', virtueCap: '36' },
         { category: 'GREATSWORD', name: 'The Paragon', attunement: 'Courage, Spirit, Grace', tier: 'Tier 3', smite: '7', virtueCap: '114+' },
         { category: 'LONG BLADE', name: 'Dewelion', attunement: 'Grace', tier: 'Tier 3', smite: '6', virtueCap: '22' },
@@ -483,7 +495,6 @@
         { category: 'SHORT BLADE', name: 'Witan', attunement: 'Courage', tier: 'Tier 2', smite: '5', virtueCap: '23', isSidearm: true },
       ];
 
-      // Local storage persistence via cookie
       const [weaponData, setWeaponData] = useState(() => {
         const saved = document.cookie.split('; ').find(row => row.startsWith('weaponData='));
         if (saved) {
@@ -513,7 +524,6 @@
       };
 
       const exportData = () => {
-        // Local export logic
         const dataStr = JSON.stringify(weaponData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
@@ -528,7 +538,6 @@
       };
 
       const importData = (event) => {
-        // Local import logic
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
@@ -561,11 +570,8 @@
         return acc;
       }, {});
 
-      // --- Settings Dropdown Component (New UI) ---
       const SettingsDropdown = () => {
         const commonButtonClasses = "flex items-center gap-3 w-full px-4 py-2 text-left grenze-font text-button hover:bg-gray-600 transition-colors";
-        
-        // Determine if Google Drive actions should be enabled
         const isDriveReady = keysLoaded && isGapiLoaded && isGisLoaded && !keyError;
 
         return (
@@ -585,7 +591,6 @@
                   <p className="text-amber-400 font-bold grenze-font text-xl">Data Management</p>
                 </div>
                 
-                {/* Local Backup Options */}
                 <div className="py-1">
                   <p className="px-4 py-2 text-sm text-gray-400 grenze-font">Local Storage (Browser)</p>
                   <button onClick={exportData} className={`${commonButtonClasses} text-amber-300`}>
@@ -597,7 +602,6 @@
                   </label>
                 </div>
 
-                {/* Google Drive Options */}
                 <div className="py-1 border-t border-gray-600">
                   <p className="px-4 py-2 text-sm text-gray-400 grenze-font">Google Drive (App Data)</p>
                   {!isDriveReady && !keyError && (
@@ -630,8 +634,6 @@
           </div>
         );
       };
-      // --- End Settings Dropdown Component ---
-
 
       const renderWeaponTable = (categoryWeapons, category) => (
         <div key={category} className="mb-8">
@@ -744,6 +746,4 @@
     root.render(<WeaponTracker />);
   </script>
 </body>
-
 </html>
-

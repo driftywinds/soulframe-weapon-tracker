@@ -202,7 +202,7 @@
       }, [keysLoaded]);
 
 
-      // --- 3. Token Client Initialization ---
+      // --- 3. Token Client Initialization (UPDATED FOR PERSISTENCE) ---
       useEffect(() => {
         if (isGisLoaded && CLIENT_ID) {
           tokenClient.current = google.accounts.oauth2.initTokenClient({
@@ -214,6 +214,15 @@
                 setDriveStatus('Error connecting to Drive.');
                 return;
               }
+              
+              // --- Save token to Local Storage for Persistence ---
+              const expiresInSeconds = response.expires_in; 
+              const expiryTime = Date.now() + (expiresInSeconds * 1000);
+              
+              localStorage.setItem('soulframe_gdrive_token', JSON.stringify(response));
+              localStorage.setItem('soulframe_token_expiry', expiryTime);
+              // --------------------------------------------------
+
               setIsDriveConnected(true);
               setDriveStatus('Connected to Google Drive (App Data).');
               setTimeout(() => setDriveStatus(''), 3000);
@@ -222,8 +231,41 @@
         }
       }, [isGisLoaded]);
 
+      // --- 3.5. RESTORE SESSION FROM STORAGE (NEW) ---
+      useEffect(() => {
+        // Only run this if GAPI is ready and we aren't already connected
+        if (!isGapiLoaded || isDriveConnected) return;
 
-      // --- 4. GOOGLE DRIVE INTEGRATION LOGIC (UPDATED) ---
+        const storedToken = localStorage.getItem('soulframe_gdrive_token');
+        const storedExpiry = localStorage.getItem('soulframe_token_expiry');
+
+        if (storedToken && storedExpiry) {
+          const now = Date.now();
+          // Check if token is still valid (giving a 1-minute buffer)
+          if (now < parseInt(storedExpiry) - 60000) {
+            try {
+              const tokenObject = JSON.parse(storedToken);
+              // Restore the token into GAPI
+              gapi.client.setToken(tokenObject);
+              setIsDriveConnected(true);
+              setDriveStatus('Session restored.');
+              setTimeout(() => setDriveStatus(''), 3000);
+            } catch (e) {
+              console.error("Failed to restore token", e);
+              localStorage.removeItem('soulframe_gdrive_token');
+              localStorage.removeItem('soulframe_token_expiry');
+            }
+          } else {
+             // Token expired
+             console.log("Stored token expired.");
+             localStorage.removeItem('soulframe_gdrive_token');
+             localStorage.removeItem('soulframe_token_expiry');
+          }
+        }
+      }, [isGapiLoaded]);
+
+
+      // --- 4. GOOGLE DRIVE INTEGRATION LOGIC ---
 
       const handleAuthClick = () => {
         if (keyError) {
@@ -247,6 +289,12 @@
         if (token !== null) {
           google.accounts.oauth2.revoke(token.access_token);
           gapi.client.setToken('');
+          
+          // --- Clear Local Storage ---
+          localStorage.removeItem('soulframe_gdrive_token');
+          localStorage.removeItem('soulframe_token_expiry');
+          // ---------------------------
+
           setIsDriveConnected(false);
           setDriveStatus('Disconnected from Drive.');
         }
@@ -268,7 +316,7 @@
             q: `name = '${DATA_FILE_NAME}' and 'appDataFolder' in parents and trashed = false`,
             fields: 'files(id, name, modifiedTime)',
             spaces: 'appDataFolder',
-            orderBy: 'modifiedTime desc' // Key fix: get latest file
+            orderBy: 'modifiedTime desc' 
           });
 
           const files = response.result.files;
@@ -342,7 +390,7 @@
             q: `name = '${DATA_FILE_NAME}' and 'appDataFolder' in parents and trashed = false`,
             fields: 'files(id, name, modifiedTime)',
             spaces: 'appDataFolder',
-            orderBy: 'modifiedTime desc' // Key fix: get latest file
+            orderBy: 'modifiedTime desc'
           });
 
           if (response.result.files && response.result.files.length > 0) {
@@ -748,7 +796,4 @@
     root.render(<WeaponTracker />);
   </script>
 </body>
-
 </html>
-
-
